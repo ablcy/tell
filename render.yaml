@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: talk
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: talk-db
+          property: connectionString
+
+databases:
+  - name: talk-db
+    plan: free
+    databaseName: talk
+    user: talk

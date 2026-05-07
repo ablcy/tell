@@ -1,0 +1,13 @@
+{
+  "name": "talk",
+  "version": 1.0.0,
+  "build": {
+    "runtime": "nodejs22"
+  },
+  "services": {
+    "talk": {
+      "preset": "nodejs22",
+      "plan": "free"
+    }
+  }
+}

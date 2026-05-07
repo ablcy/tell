@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YanTalk - 即时聊天</title>
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="auth-screen" class="screen">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <img src="logo.jpg" alt="YanTalk Logo" class="app-logo">
+                    <h1>YanTalk</h1>
+                    <p>即时通讯聊天工具</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button id="login-tab" class="active">登录</button>
+                    <button id="register-tab">注册</button>
+                </div>
+
+                <form id="login-form">
+                    <input type="text" id="login-username" placeholder="账号" required>
+                    <input type="password" id="login-password" placeholder="密码" required>
+                    <button type="submit" id="login-form-submit-btn">登录</button>
+                    <p class="error-message" id="login-error"></p>
+                </form>
+
+                <form id="register-form" style="display: none;">
+                    <input type="text" id="register-username" placeholder="账号（至少3个字符）" required>
+                    <input type="password" id="register-password" placeholder="密码" required>
+                    <input type="password" id="register-password-confirm" placeholder="确认密码" required>
+                    <button type="submit" id="register-form-submit-btn">注册</button>
+                    <p class="error-message" id="register-error"></p>
+                </form>
+
+                <div class="version-info">
+                    <span>v3.0.1</span>
+                    <span class="copyright">© 2026 Li Chengyan. All Rights Reserved.</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-screen" class="screen" style="display: none;">
+            <div class="main-wrapper">
+                <main class="main-content">
+                    <div id="tab-chats" class="tab-content active">
+                        <div class="search-bar">
+                            <input type="text" placeholder="搜索好友/账号" id="search-input">
+                        </div>
+                        <div id="search-result" class="search-result" style="display: none;">
+                            <div class="search-result-item" id="search-result-item">
+                                <div class="avatar" id="search-result-avatar"></div>
+                                <div class="search-result-info">
+                                    <span id="search-result-username"></span>
+                                </div>
+                                <button id="confirm-add-friend-btn" class="add-friend-confirm-btn">添加</button>
+                            </div>
+                        </div>
+                        <div class="chat-list" id="chat-list">
+                            <div class="empty-state">暂无聊天记录，请在搜索框输入账号添加好友</div>
+                        </div>
+                    </div>
+
+                    <div id="tab-discover" class="tab-content">
+                        <div class="discover-list">
+                            <div class="discover-item" id="share-app-btn">
+                                <span class="discover-icon">📤</span>
+                                <span>分享应用</span>
+                                <span class="arrow">›</span>
+                            </div>
+                            <div class="discover-item" id="toggle-theme-btn">
+                                <span class="discover-icon">🌙</span>
+                                <span>深色模式</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="theme-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="discover-item" id="toggle-lang-btn">
+                                <span class="discover-icon">🌐</span>
+                                <span>英文模式</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="lang-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="update-info">
+                            <div class="update-header" id="update-header" style="cursor: pointer;">
+                                <img src="logo.jpg" alt="YanTalk Logo" class="update-logo">
+                                <h3>更新日志 v3.0.1</h3>
+                                <span class="toggle-arrow">▼</span>
+                            </div>
+                            <div class="update-content" id="update-content" style="display: none;">
+                                <div class="update-item">✨ v3.0.1: 新增修改账号功能，支持用户修改账号名称；为所有操作按钮添加加载动画</div>
+                                <div class="update-item">✨ v2.0.0: 合并消息与通讯录界面；优化添加好友流程，搜索后显示用户信息再添加；聊天自动滚动到底部；新用户注册自动发送欢迎消息</div>
+                                <div class="update-item">🔧 v1.3.1: 新增自定义昵称功能，账号与昵称分离；优化界面布局</div>
+                                <div class="update-item">🔧 v1.2.5: 删除emoji按钮，调整输入区域布局，发送按钮改为圆形向上箭头</div>
+                                <div class="update-item">🔧 v1.2.4: 将所有头像统一改成圆形（网站图标、logo、登录界面、聊天列表、通讯录、个人资料）</div>
+                                <div class="update-item">🔧 v1.2.3: 修复头像显示问题，优化头像容器结构，确保图片和首字母头像都能正确显示</div>
+                                <div class="update-item">🔧 v1.2.2: 修复头像显示问题，优化头像位置布局，调整气泡圆角样式</div>
+                                <div class="update-item">🔧 v1.2.1: 修复图片消息显示为路径字符串的问题，调整头像位置到聊天气泡右侧（优化</div>
+                                <div class="update-item">🚀 v1.2.0: 支持用户自定义头像，支持发送图片消息，支持修改密码</div>
+                                <div class="update-item">🌟 v1.1.7: 更换新Logo和图标，所有标题左边添加小图标</div>
+                                <div class="update-item">📏 v1.1.6: 减小聊天气泡和联系人列表的上下间距，让界面更紧凑</div>
+                                <div class="update-item">💬 v1.1.5: 调整聊天气泡和联系人列表宽度，让界面更精致</div>
+                                <div class="update-item">📱 v1.1.4: 界面优化，聊天消息框与导航栏等宽，平铺整个屏幕</div>
+                                <div class="update-item">✨ v1.1.3: 优化界面设计，平铺展开，增加更多留白和视觉层次</div>
+                                <div class="update-item">🖼️ v1.1.2: 添加自定义Logo和网站图标，消息时间显示为北京时间格式</div>
+                                <div class="update-item">🎨 v1.1.1: 网站名称更改为YanTalk，更新版权信息</div>
+                                <div class="update-item">🔧 v1.1.0: 修复消息刷新后位置错误的bug</div>
+                                <div class="update-item">🔒 v1.0.3: 后台管理系统添加管理员登录保护</div>
+                                <div class="update-item">✨ v1.0.2: 新增后台管理面板，支持查看/删除用户</div>
+                                <div class="update-item">✨ v1.0.1: 优化页面布局，与底部导航栏等宽</div>
+                                <div class="update-item">✨ v1.0.0: 全新 Talk 聊天软件发布</div>
+                                <div class="update-item">🔐 密码加密保护，安全可靠</div>
+                                <div class="update-item">💾 Neon 云数据库，数据永不丢失</div>
+                                <div class="update-item">⚡ 实时消息轮询，即时送达</div>
+                                <div class="update-item">📱 跨平台支持，随时随地聊天</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-me" class="tab-content">
+                        <div class="profile-header">
+                            <div class="avatar-large" id="profile-avatar-container" style="cursor: pointer;">
+                                <img id="profile-avatar-img" src="" alt="头像" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <span id="profile-avatar">?</span>
+                            </div>
+                            <div class="profile-info">
+                                <span id="profile-username" class="profile-name">未登录</span>
+                                <span id="profile-nickname" class="profile-nickname" style="display: none;"></span>
+                            </div>
+                        </div>
+                        <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;">
+                        <div class="settings-list">
+                            <div class="settings-item" id="change-username-btn">
+                                <span>📝 修改账号</span>
+                                <span class="arrow">›</span>
+                            </div>
+                            <div class="settings-item" id="upload-avatar-btn">
+                                <span>📷 修改头像</span>
+                                <span class="arrow">›</span>
+                            </div>
+                            <div class="settings-item" id="change-password-btn">
+                                <span>🔑 修改密码</span>
+                                <span class="arrow">›</span>
+                            </div>
+                            <div class="settings-item" id="logout-btn">
+                                <span>退出登录</span>
+                                <span class="arrow">›</span>
+                            </div>
+                        </div>
+                        <div class="footer-info">
+                            <p>YanTalk v3.0.1</p>
+                            <p class="copyright">© 2026 Li Chengyan. All Rights Reserved.</p>
+                            <p id="uptime-display" class="uptime"></p>
+                        </div>
+                    </div>
+                </main>
+
+                <nav class="bottom-nav">
+                    <div class="nav-item active" data-tab="chats">
+                        <span class="nav-icon">💬</span>
+                        <span>消息</span>
+                    </div>
+                    <div class="nav-item" data-tab="discover">
+                        <span class="nav-icon">🔍</span>
+                        <span>发现</span>
+                    </div>
+                    <div class="nav-item" data-tab="me">
+                        <span class="nav-icon">👤</span>
+                        <span>个人</span>
+                    </div>
+                </nav>
+            </div>
+
+            <div id="chat-view" class="chat-view" style="display: none;">
+                <div class="chat-header">
+                    <button id="back-btn" class="icon-btn">‹</button>
+                    <span id="chat-friend-name">好友名称</span>
+                    <button class="icon-btn">⋮</button>
+                </div>
+                <div id="messages-container" class="messages-container">
+                    <div class="empty-chat">
+                        <p>开始聊天吧！</p>
+                    </div>
+                </div>
+                <div class="message-input-area">
+                    <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+                    <input type="text" id="message-input" placeholder="输入消息...">
+                    <button id="image-btn" class="icon-btn">+</button>
+                    <button id="send-btn" class="send-btn">发送</button>
+                </div>
+            </div>
+
+            <div id="change-password-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>修改密码</h3>
+                        <button id="close-password-modal-btn" class="icon-btn">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="password" id="old-password-input" placeholder="原密码">
+                        <input type="password" id="new-password-input" placeholder="新密码">
+                        <input type="password" id="confirm-password-input" placeholder="确认新密码">
+                        <p class="error-message" id="change-password-error"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="confirm-change-password-btn">修改</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="change-username-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>修改账号</h3>
+                        <button id="close-username-modal-btn" class="icon-btn">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="new-username-input" placeholder="输入新账号">
+                        <p class="error-message" id="change-username-error"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="confirm-change-username-btn">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

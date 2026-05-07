@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YanTalk Admin - 用户管理后台</title>
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="admin-logo">🔒</div>
+                <h1>YanTalk Admin</h1>
+                <p>管理员登录</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="password" placeholder="请输入密码" required>
+                </div>
+                <p class="error-message" id="login-error"></p>
+                <button type="submit" class="btn btn-primary btn-block">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app" style="display: none;">
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="admin-header-title">
+                    <img src="logo.jpg" alt="YanTalk Logo" class="admin-header-logo">
+                    <h1>YanTalk Admin</h1>
+                </div>
+                <div class="header-right">
+                    <span id="current-user" class="user-badge"></span>
+                    <span class="version-badge">v1.2.4</span>
+                    <button id="logout-btn" class="btn btn-secondary">退出登录</button>
+                    <a href="/" class="back-link">← 返回应用</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <section class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <h3 id="total-users">0</h3>
+                        <p>注册用户</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-content">
+                        <h3 id="total-messages">0</h3>
+                        <p>消息总数</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">❤️</div>
+                    <div class="stat-content">
+                        <h3 id="total-friendships">0</h3>
+                        <p>好友关系</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="users-section">
+                <div class="section-header">
+                    <h2>用户列表</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <input type="text" id="search-user-search" placeholder="搜索用户...">
+                            <button class="search-btn">🔍</button>
+                        </div>
+                        <button id="refresh-btn" class="btn btn-primary">🔄 刷新</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>头像</th>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>注册时间</th>
+                                <th>消息数</th>
+                                <th>好友数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <tr class="loading-row">
+                                <td colspan="6">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="logs-section">
+                <div class="section-header">
+                <h2>系统日志</h2>
+                    <button id="clear-logs-btn" class="btn btn-danger">🗑️ 清空日志</button>
+                </div>
+                <div class="logs-container" id="logs-container">
+                    <div class="log-entry">
+                        <span class="log-time">[系统]</span>
+                        <span class="log-message">YanTalk Admin v1.2.4 启动成功</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="confirm-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">确认操作</h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">确定要执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-btn" class="btn btn-secondary">取消</button>
+                <button id="confirm-btn" class="btn btn-danger">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
