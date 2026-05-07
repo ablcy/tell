@@ -7,6 +7,4 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        value: "libsql://database-claret-diamond-vercel-icfg-rswpbsot4jfgjq8attvxdhob.aws-us-east-1.turso.io"
-      - key: TURSO_AUTH_TOKEN
-        value: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzgxMzM3MjksImlkIjoiMDE5ZTAxMDctODAwMS03NjE2LTgwYjgtYjU2ODZiNTBiNDI4IiwicmlkIjoiMDQzOTE3NmUtZmY1Ni00Y2FjLWFlNTQtYzVjY2U0NmM0MTk3In0.NB4YykvDF9vRwfbQZiFedg__Nbtgj-ItR9fd5lxZI0q4URNNwgKn8yvgMsIxbf94WlROlenQ0sIiIadvQMTZDg"
+        value: "postgresql://neondb_owner:npg_o9XGQhSY0Pgf@ep-dark-rain-apyozkkj-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"

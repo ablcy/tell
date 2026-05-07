@@ -7,9 +7,6 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 
-const DATABASE_URL = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL;
-const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -78,54 +75,28 @@ function adminAuthMiddleware(req, res, next) {
 }
 
 let usersDB, friendshipsDB, messagesDB;
-let isTurso = false;
 
 if (DATABASE_URL) {
-  isTurso = DATABASE_URL.startsWith('libsql://');
-  
-  if (isTurso) {
-    const { createClient } = require('@libsql/client');
-    const client = createClient({
-      url: DATABASE_URL,
-      authToken: TURSO_AUTH_TOKEN
-    });
+  const { Pool } = require('pg');
+  const pool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
 
-    const db = {
-      query: async (sql, params = []) => {
-        const result = await client.execute(sql, params);
-        return { rows: result.rows, rowCount: result.rows.length };
-      },
-      run: async (sql, params = []) => {
-        const result = await client.execute(sql, params);
-        return { lastID: result.rows[0]?.id || null, changes: result.rows.length };
-      }
-    };
+  const db = {
+    query: async (sql, params = []) => {
+      const result = await pool.query(sql, params);
+      return { rows: result.rows, rowCount: result.rowCount };
+    },
+    run: async (sql, params = []) => {
+      const result = await pool.query(sql, params);
+      return { lastID: result.rows[0]?.id || null, changes: result.rowCount };
+    }
+  };
 
-    usersDB = db;
-    friendshipsDB = db;
-    messagesDB = db;
-  } else {
-    const { Pool } = require('pg');
-    const pool = new Pool({
-      connectionString: DATABASE_URL,
-      ssl: DATABASE_URL ? { rejectUnauthorized: false } : false
-    });
-
-    const db = {
-      query: async (sql, params = []) => {
-        const result = await pool.query(sql, params);
-        return { rows: result.rows, rowCount: result.rowCount };
-      },
-      run: async (sql, params = []) => {
-        const result = await pool.query(sql, params);
-        return { lastID: result.rows[0]?.id || null, changes: result.rowCount };
-      }
-    };
-
-    usersDB = db;
-    friendshipsDB = db;
-    messagesDB = db;
-  }
+  usersDB = db;
+  friendshipsDB = db;
+  messagesDB = db;
 } else {
   const Datastore = require('nedb');
   usersDB = new Datastore({ filename: './data/users.db', autoload: true });
