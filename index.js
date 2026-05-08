@@ -38,7 +38,7 @@ const upload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Âè™ÂÖÅËÆ∏‰∏ä‰º†ÂõæÁâáÊñá‰ª∂'));
+      cb(new Error('Âè™ÂÖÅËÆ∏‰∏ä‰º†ÂõæÁâáÊñá‰ª?));
     }
   }
 });
@@ -74,7 +74,7 @@ function adminAuthMiddleware(req, res, next) {
   next();
 }
 
-let usersDB, friendshipsDB, messagesDB;
+let usersDB, friendshipsDB, messagesDB, groupsDB, groupMembersDB, groupMessagesDB;
 
 if (DATABASE_URL) {
   const { Pool } = require('pg');
@@ -97,18 +97,28 @@ if (DATABASE_URL) {
   usersDB = db;
   friendshipsDB = db;
   messagesDB = db;
-} else {
+  groupsDB = db;
+  groupMembersDB = db;
+  groupMessagesDB = db;
+  } else {
   const Datastore = require('nedb');
   usersDB = new Datastore({ filename: './data/users.db', autoload: true });
   friendshipsDB = new Datastore({ filename: './data/friendships.db', autoload: true });
   messagesDB = new Datastore({ filename: './data/messages.db', autoload: true });
+  groupsDB = new Datastore({ filename: './data/groups.db', autoload: true });
+  groupMembersDB = new Datastore({ filename: './data/group_members.db', autoload: true });
+  groupMessagesDB = new Datastore({ filename: './data/group_messages.db', autoload: true });
 
   usersDB.ensureIndex({ fieldName: 'username', unique: true });
   friendshipsDB.ensureIndex({ fieldName: 'user_id' });
   friendshipsDB.ensureIndex({ fieldName: ['user_id', 'friend_id'], unique: true });
   messagesDB.ensureIndex({ fieldName: 'sender_id' });
   messagesDB.ensureIndex({ fieldName: 'receiver_id' });
-}
+  groupsDB.ensureIndex({ fieldName: 'group_number', unique: true });
+  groupMembersDB.ensureIndex({ fieldName: 'group_id' });
+  groupMembersDB.ensureIndex({ fieldName: ['group_id', 'user_id'], unique: true });
+  groupMessagesDB.ensureIndex({ fieldName: 'group_id' });
+  }
 
 async function initDB() {
   if (DATABASE_URL) {
@@ -127,7 +137,7 @@ async function initDB() {
       `);
       console.log('Users table created/verified');
 
-      // Á°Æ‰øù nickname ÂàóÂ≠òÂú®
+      // Á°Æ‰øù nickname ÂàóÂ≠òÂú?
       try {
         await usersDB.query('ALTER TABLE users ADD COLUMN nickname TEXT DEFAULT \'\'');
         console.log('Added nickname column to users table');
@@ -135,7 +145,7 @@ async function initDB() {
         console.log('Nickname column already exists');
       }
 
-      // Á°Æ‰øù avatar ÂàóÂ≠òÂú®
+      // Á°Æ‰øù avatar ÂàóÂ≠òÂú?
       try {
         await usersDB.query('ALTER TABLE users ADD COLUMN avatar TEXT');
         console.log('Added avatar column to users table');
@@ -218,7 +228,7 @@ app.post('/api/register', async (req, res) => {
   }
 
   if (username.length < 3) {
-    return res.status(400).json({ success: false, message: 'Áî®Êà∑ÂêçËá≥Â∞ëÈúÄË¶Å3‰∏™Â≠óÁ¨¶' });
+    return res.status(400).json({ success: false, message: 'Áî®Êà∑ÂêçËá≥Â∞ëÈúÄË¶?‰∏™Â≠óÁ¨? });
   }
 
   try {
@@ -232,7 +242,7 @@ app.post('/api/register', async (req, res) => {
     }
 
     if ((DATABASE_URL && existing.rows.length > 0) || (!DATABASE_URL && existing.length > 0)) {
-      return res.status(400).json({ success: false, message: 'Áî®Êà∑ÂêçÂ∑≤Ë¢´‰ΩøÁî®' });
+      return res.status(400).json({ success: false, message: 'Áî®Êà∑ÂêçÂ∑≤Ë¢´‰ΩøÁî? });
     }
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -414,7 +424,7 @@ app.get('/api/user/:username', async (req, res) => {
     const userData = DATABASE_URL ? user.rows[0] : user[0];
 
     if (!userData) {
-      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú®' });
+      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú? });
     }
 
     res.json({ success: true, user: userData });
@@ -446,11 +456,11 @@ app.post('/api/add-friend', async (req, res) => {
     const friendData = DATABASE_URL ? friend.rows[0] : friend[0];
 
     if (!friendData) {
-      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú®' });
+      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú? });
     }
 
     if (userId === friendData.id) {
-      return res.status(400).json({ success: false, message: '‰∏çËÉΩÊ∑ªÂä†Ëá™Â∑±‰∏∫Â•ΩÂèã' });
+      return res.status(400).json({ success: false, message: '‰∏çËÉΩÊ∑ªÂä†Ëá™Â∑±‰∏∫Â•ΩÂè? });
     }
 
     let existing;
@@ -467,7 +477,7 @@ app.post('/api/add-friend', async (req, res) => {
     }
 
     if ((DATABASE_URL && existing.rows.length > 0) || (!DATABASE_URL && existing.length > 0)) {
-      return res.status(400).json({ success: false, message: 'Â∑≤ÁªèÊòØÂ•ΩÂèã' });
+      return res.status(400).json({ success: false, message: 'Â∑≤ÁªèÊòØÂ•ΩÂè? });
     }
 
     if (DATABASE_URL) {
@@ -636,7 +646,7 @@ app.post('/api/send-message', async (req, res) => {
     res.json({ success: true, message });
   } catch (error) {
     console.error('Send message error:', error);
-    res.status(500).json({ success: false, message: 'ÂèëÈÄÅÂ§±Ë¥•' });
+    res.status(500).json({ success: false, message: 'ÂèëÈÄÅÂ§±Ë¥? });
   }
 });
 
@@ -706,7 +716,7 @@ app.get('/api/admin/verify', (req, res) => {
   if (token && validateAdminToken(token)) {
     res.json({ success: true, username: ADMIN_USERNAME });
   } else {
-    res.status(401).json({ success: false, message: 'Êú™ÁôªÂΩï' });
+    res.status(401).json({ success: false, message: 'Êú™ÁôªÂΩ? });
   }
 });
 
@@ -828,7 +838,7 @@ app.post('/api/change-password', async (req, res) => {
   }
 
   if (newPassword.length < 1) {
-    return res.status(400).json({ success: false, message: 'Êñ∞ÂØÜÁ†Å‰∏çËÉΩ‰∏∫Á©∫' });
+    return res.status(400).json({ success: false, message: 'Êñ∞ÂØÜÁ†Å‰∏çËÉΩ‰∏∫Á©? });
   }
 
   try {
@@ -842,13 +852,13 @@ app.post('/api/change-password', async (req, res) => {
     const userData = DATABASE_URL ? user.rows[0] : user[0];
 
     if (!userData) {
-      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú®' });
+      return res.status(400).json({ success: false, message: 'Áî®Êà∑‰∏çÂ≠òÂú? });
     }
 
     const passwordMatch = await bcrypt.compare(oldPassword, userData.password);
 
     if (!passwordMatch) {
-      return res.status(400).json({ success: false, message: 'ÂéüÂØÜÁ†ÅÈîôËØØ' });
+      return res.status(400).json({ success: false, message: 'ÂéüÂØÜÁ†ÅÈîôËØ? });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
@@ -879,11 +889,11 @@ app.post('/api/change-username', async (req, res) => {
   }
 
   if (username.length < 3) {
-    return res.status(400).json({ success: false, message: 'Ë¥¶Âè∑Ëá≥Â∞ëÈúÄË¶Å3‰∏™Â≠óÁ¨¶' });
+    return res.status(400).json({ success: false, message: 'Ë¥¶Âè∑Ëá≥Â∞ëÈúÄË¶?‰∏™Â≠óÁ¨? });
   }
 
   if (username.length > 20) {
-    return res.status(400).json({ success: false, message: 'Ë¥¶Âè∑‰∏çËÉΩË∂ÖËøá20‰∏™Â≠óÁ¨¶' });
+    return res.status(400).json({ success: false, message: 'Ë¥¶Âè∑‰∏çËÉΩË∂ÖËøá20‰∏™Â≠óÁ¨? });
   }
 
   try {
@@ -895,7 +905,7 @@ app.post('/api/change-username', async (req, res) => {
     }
 
     if ((DATABASE_URL && existing.rows.length > 0) || (!DATABASE_URL && existing.length > 0)) {
-      return res.status(400).json({ success: false, message: 'ËØ•Ë¥¶Âè∑Â∑≤Ë¢´‰ΩøÁî®' });
+      return res.status(400).json({ success: false, message: 'ËØ•Ë¥¶Âè∑Â∑≤Ë¢´‰ΩøÁî? });
     }
 
     if (DATABASE_URL) {
@@ -924,7 +934,7 @@ app.post('/api/fix-db', async (req, res) => {
   try {
     console.log('Fixing database schema...');
     
-    // Ê∑ªÂä† nickname Âàó
+    // Ê∑ªÂä† nickname Âà?
     try {
       await usersDB.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname TEXT DEFAULT \'\'');
       console.log('Fixed nickname column');
@@ -932,7 +942,7 @@ app.post('/api/fix-db', async (req, res) => {
       console.log('Nickname column fix error:', e.message);
     }
     
-    // Ê∑ªÂä† avatar Âàó
+    // Ê∑ªÂä† avatar Âà?
     try {
       await usersDB.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT');
       console.log('Fixed avatar column');
@@ -967,6 +977,320 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Upload image error:', error);
     res.status(500).json({ success: false, message: '‰∏ä‰º†Â§±Ë¥•' });
+  }
+});
+
+// ¥¥Ω®»∫¡ƒ
+app.post('/api/group/create', async (req, res) => {
+  try {
+    const { userId, groupName, groupNumber } = req.body;
+
+    if (!userId || !groupName || !groupNumber) {
+      return res.status(400).json({ success: false, message: '≤Œ ˝≤ªÕÍ’˚' });
+    }
+
+    if (DATABASE_URL) {
+      const existingGroup = await groupsDB.query('SELECT id FROM `groups` WHERE group_number = $1', [groupNumber]);
+      if (existingGroup.rows.length > 0) {
+        return res.status(400).json({ success: false, message: '»∫∫≈“—±ª π”√' });
+      }
+
+      const groupId = uuidv4();
+      await groupsDB.query(
+        'INSERT INTO `groups` (id, group_number, name, owner_id) VALUES ($1, $2, $3, $4)',
+        [groupId, groupNumber, groupName, userId]
+      );
+
+      await groupMembersDB.query(
+        'INSERT INTO group_members (group_id, user_id, role) VALUES ($1, $2, $3)',
+        [groupId, userId, 'owner']
+      );
+
+      res.json({ success: true, group: { id: groupId, group_number: groupNumber, name: groupName, owner_id: userId } });
+    } else {
+      const existingGroup = await promisifyDB(groupsDB.findOne).call(groupsDB, { group_number: groupNumber });
+      if (existingGroup) {
+        return res.status(400).json({ success: false, message: '»∫∫≈“—±ª π”√' });
+      }
+
+      const groupId = uuidv4();
+      await promisifyDB(groupsDB.insert).call(groupsDB, {
+        _id: groupId,
+        id: groupId,
+        group_number: groupNumber,
+        name: groupName,
+        owner_id: userId,
+        created_at: new Date().toISOString()
+      });
+
+      await promisifyDB(groupMembersDB.insert).call(groupMembersDB, {
+        _id: uuidv4(),
+        group_id: groupId,
+        user_id: userId,
+        role: 'owner',
+        joined_at: new Date().toISOString()
+      });
+
+      res.json({ success: true, group: { id: groupId, group_number: groupNumber, name: groupName, owner_id: userId } });
+    }
+  } catch (error) {
+    console.error('Create group error:', error);
+    res.status(500).json({ success: false, message: '¥¥Ω®»∫¡ƒ ß∞‹' });
+  }
+});
+
+// ªÒ»°”√ªßÀ˘‘⁄µƒÀ˘”–»∫
+app.get('/api/groups/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    let groups = [];
+    if (DATABASE_URL) {
+      const result = await groupMembersDB.query(
+        'SELECT g.id, g.group_number, g.name, g.avatar, g.owner_id FROM `groups` g INNER JOIN group_members gm ON g.id = gm.group_id WHERE gm.user_id = $1',
+        [userId]
+      );
+      groups = result.rows;
+    } else {
+      const memberships = await promisifyDB(groupMembersDB.find).call(groupMembersDB, { user_id: userId });
+      for (const m of memberships) {
+        const group = await promisifyDB(groupsDB.findOne).call(groupsDB, { id: m.group_id });
+        if (group) groups.push(group);
+      }
+    }
+
+    res.json({ success: true, groups });
+  } catch (error) {
+    console.error('Get groups error:', error);
+    res.status(500).json({ success: false, message: 'ªÒ»°»∫¡–±Ì ß∞‹' });
+  }
+});
+
+// ªÒ»°»∫≥…‘±
+app.get('/api/group/:groupId/members', async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    let members = [];
+    if (DATABASE_URL) {
+      const result = await groupMembersDB.query(
+        'SELECT gm.role, gm.joined_at, u.id, u.username, u.avatar, u.nickname FROM group_members gm INNER JOIN users u ON gm.user_id = u.id WHERE gm.group_id = $1',
+        [groupId]
+      );
+      members = result.rows;
+    } else {
+      members = await promisifyDB(groupMembersDB.find).call(groupMembersDB, { group_id: groupId });
+      for (const m of members) {
+        const user = await promisifyDB(usersDB.findOne).call(usersDB, { id: m.user_id });
+        if (user) {
+          m.username = user.username;
+          m.avatar = user.avatar;
+          m.nickname = user.nickname;
+        }
+      }
+    }
+
+    res.json({ success: true, members });
+  } catch (error) {
+    console.error('Get group members error:', error);
+    res.status(500).json({ success: false, message: 'ªÒ»°»∫≥…‘± ß∞‹' });
+  }
+});
+
+// »∫÷˜¿≠∫√”—Ω¯»∫
+app.post('/api/group/invite', async (req, res) => {
+  try {
+    const { groupId, friendIds, ownerId } = req.body;
+
+    let group = null;
+    if (DATABASE_URL) {
+      const result = await groupsDB.query('SELECT owner_id FROM `groups` WHERE id = $1', [groupId]);
+      if (result.rows.length > 0) group = result.rows[0];
+    } else {
+      group = await promisifyDB(groupsDB.findOne).call(groupsDB, { id: groupId });
+    }
+
+    if (!group || group.owner_id !== ownerId) {
+      return res.status(403).json({ success: false, message: '÷ª”–»∫÷˜ø…“‘¿≠»À' });
+    }
+
+    const addedMembers = [];
+    for (const friendId of friendIds) {
+      if (DATABASE_URL) {
+        try {
+          await groupMembersDB.query(
+            'INSERT INTO group_members (group_id, user_id, role) VALUES ($1, $2, $3)',
+            [groupId, friendId, 'member']
+          );
+          addedMembers.push(friendId);
+        } catch (e) {
+          console.log('Member already in group or error:', e.message);
+        }
+      } else {
+        const existing = await promisifyDB(groupMembersDB.findOne).call(groupMembersDB, { group_id: groupId, user_id: friendId });
+        if (!existing) {
+          await promisifyDB(groupMembersDB.insert).call(groupMembersDB, {
+            _id: uuidv4(),
+            group_id: groupId,
+            user_id: friendId,
+            role: 'member',
+            joined_at: new Date().toISOString()
+          });
+          addedMembers.push(friendId);
+        }
+      }
+    }
+
+    res.json({ success: true, message: '“—≥…π¶—˚«Î' + addedMembers.length + '»À', addedMembers });
+  } catch (error) {
+    console.error('Invite to group error:', error);
+    res.status(500).json({ success: false, message: '—˚«Î»Î»∫ ß∞‹' });
+  }
+});
+
+// ∑¢ÀÕ»∫œ˚œ¢
+app.post('/api/group/message', async (req, res) => {
+  try {
+    const { groupId, senderId, content, type = 'text' } = req.body;
+
+    let member = null;
+    if (DATABASE_URL) {
+      const result = await groupMembersDB.query('SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2', [groupId, senderId]);
+      if (result.rows.length > 0) member = result.rows[0];
+    } else {
+      member = await promisifyDB(groupMembersDB.findOne).call(groupMembersDB, { group_id: groupId, user_id: senderId });
+    }
+
+    if (!member) {
+      return res.status(403).json({ success: false, message: 'ƒ„≤ª «»∫≥…‘±' });
+    }
+
+    const messageId = uuidv4();
+    const time = new Date().toLocaleString('zh-CN', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    }).replace(/\//g, '-');
+    const timestamp = Date.now();
+
+    if (DATABASE_URL) {
+      await groupMessagesDB.query(
+        'INSERT INTO group_messages (id, group_id, sender_id, content, type, time, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [messageId, groupId, senderId, content, type, time, timestamp]
+      );
+    } else {
+      await promisifyDB(groupMessagesDB.insert).call(groupMessagesDB, {
+        _id: messageId,
+        id: messageId,
+        group_id: groupId,
+        sender_id: senderId,
+        content,
+        type,
+        time,
+        timestamp
+      });
+    }
+
+    res.json({ success: true, message: { id: messageId, group_id: groupId, sender_id: senderId, content, type, time, timestamp } });
+  } catch (error) {
+    console.error('Send group message error:', error);
+    res.status(500).json({ success: false, message: '∑¢ÀÕ»∫œ˚œ¢ ß∞‹' });
+  }
+});
+
+// ªÒ»°»∫œ˚œ¢
+app.get('/api/group/:groupId/messages', async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { limit = 50 } = req.query;
+
+    let messages = [];
+    if (DATABASE_URL) {
+      const result = await groupMessagesDB.query(
+        'SELECT gm.id, gm.sender_id, gm.content, gm.type, gm.time, u.username FROM group_messages gm INNER JOIN users u ON gm.sender_id = u.id WHERE gm.group_id = $1 ORDER BY gm.timestamp ASC LIMIT $2',
+        [groupId, parseInt(limit)]
+      );
+      messages = result.rows;
+    } else {
+      messages = await promisifyDB(groupMessagesDB.find).call(groupMessagesDB, { group_id: groupId });
+      messages.sort((a, b) => a.timestamp - b.timestamp);
+      messages = messages.slice(-parseInt(limit));
+      for (const m of messages) {
+        const user = await promisifyDB(usersDB.findOne).call(usersDB, { id: m.sender_id });
+        if (user) m.username = user.username;
+      }
+    }
+
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error('Get group messages error:', error);
+    res.status(500).json({ success: false, message: 'ªÒ»°»∫œ˚œ¢ ß∞‹' });
+  }
+});
+
+// ÕÀ≥ˆ»∫
+app.post('/api/group/leave', async (req, res) => {
+  try {
+    const { groupId, userId } = req.body;
+
+    let group = null;
+    if (DATABASE_URL) {
+      const result = await groupsDB.query('SELECT owner_id FROM `groups` WHERE id = $1', [groupId]);
+      if (result.rows.length > 0) group = result.rows[0];
+    } else {
+      group = await promisifyDB(groupsDB.findOne).call(groupsDB, { id: groupId });
+    }
+
+    if (group && group.owner_id === userId) {
+      return res.status(400).json({ success: false, message: '»∫÷˜≤ªƒ‹ÕÀ≥ˆ»∫£¨«Îœ»Ω‚…¢»∫' });
+    }
+
+    if (DATABASE_URL) {
+      await groupMembersDB.query('DELETE FROM group_members WHERE group_id = $1 AND user_id = $2', [groupId, userId]);
+    } else {
+      await promisifyDB(groupMembersDB.remove).call(groupMembersDB, { group_id: groupId, user_id: userId });
+    }
+
+    res.json({ success: true, message: '“—ÕÀ≥ˆ»∫' });
+  } catch (error) {
+    console.error('Leave group error:', error);
+    res.status(500).json({ success: false, message: 'ÕÀ≥ˆ»∫ ß∞‹' });
+  }
+});
+
+// Ω‚…¢»∫£®»∫÷˜£©
+app.post('/api/group/dissolve', async (req, res) => {
+  try {
+    const { groupId, userId } = req.body;
+
+    let group = null;
+    if (DATABASE_URL) {
+      const result = await groupsDB.query('SELECT owner_id FROM `groups` WHERE id = $1', [groupId]);
+      if (result.rows.length > 0) group = result.rows[0];
+    } else {
+      group = await promisifyDB(groupsDB.findOne).call(groupsDB, { id: groupId });
+    }
+
+    if (!group || group.owner_id !== userId) {
+      return res.status(403).json({ success: false, message: '÷ª”–»∫÷˜ø…“‘Ω‚…¢»∫' });
+    }
+
+    if (DATABASE_URL) {
+      await groupMessagesDB.query('DELETE FROM group_messages WHERE group_id = $1', [groupId]);
+      await groupMembersDB.query('DELETE FROM group_members WHERE group_id = $1', [groupId]);
+      await groupsDB.query('DELETE FROM `groups` WHERE id = $1', [groupId]);
+    } else {
+      await groupMessagesDB.remove({ group_id: groupId });
+      await groupMembersDB.remove({ group_id: groupId });
+      await groupsDB.remove({ id: groupId });
+    }
+
+    res.json({ success: true, message: '»∫“—Ω‚…¢' });
+  } catch (error) {
+    console.error('Dissolve group error:', error);
+    res.status(500).json({ success: false, message: 'Ω‚…¢»∫ ß∞‹' });
   }
 });
 
