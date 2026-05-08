@@ -55,6 +55,12 @@ class ChatApp {
 
         // 新增：合并搜索入口的加入群聊按钮
         document.getElementById('confirm-join-group-btn').addEventListener('click', () => this.confirmJoinGroup());
+
+        // 群聊图片上传功能
+        document.getElementById('group-image-btn').addEventListener('click', () => {
+            document.getElementById('group-image-upload-input').click();
+        });
+        document.getElementById('group-image-upload-input').addEventListener('change', (e) => this.handleGroupImageUpload(e));
     }
 
     async loadGroups() {
@@ -113,6 +119,12 @@ class ChatApp {
         document.getElementById('group-chat-view').style.display = 'flex';
         document.getElementById('group-chat-name').textContent = group.name;
 
+        // 加载群成员信息
+        const membersResult = await this.fetchData(`/api/group/${groupId}/members`);
+        if (membersResult.success) {
+            this.currentGroupMembers = membersResult.members;
+        }
+
         await this.loadGroupMessages(groupId);
         this.renderGroupMessages();
     }
@@ -145,12 +157,49 @@ class ChatApp {
 
         container.innerHTML = messages.map(msg => {
             const isMine = msg.senderId === this.currentUser.id;
+            
+            // 获取发送者信息
+            let sender = null;
+            if (isMine) {
+                sender = this.currentUser;
+            } else if (this.currentGroupMembers) {
+                sender = this.currentGroupMembers.find(m => m.id === msg.senderId);
+            }
+            
+            // 如果找不到，尝试从 msg.senderName 中获取
+            if (!sender && msg.senderName) {
+                sender = {
+                    username: msg.senderName,
+                    avatar: ''
+                };
+            }
 
-            let avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; flex-shrink: 0;">
-                ${msg.senderName ? msg.senderName.charAt(0).toUpperCase() : 'U'}
-            </div>`;
+            let avatarContent = '';
+            if (sender) {
+                if (sender.avatar && sender.avatar.trim() !== '') {
+                    // 有头像时显示图片
+                    avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                        <img src="${sender.avatar}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>`;
+                } else {
+                    // 没有头像时显示首字母
+                    avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; flex-shrink: 0;">
+                        ${sender.username ? sender.username.charAt(0).toUpperCase() : 'U'}
+                    </div>`;
+                }
+            } else {
+                // 默认头像
+                avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; flex-shrink: 0;">
+                    U
+                </div>`;
+            }
 
-            let messageContent = `<p>${msg.content}</p>`;
+            let messageContent = '';
+            if (msg.type === 'image') {
+                messageContent = `<img src="${msg.content}" alt="" style="max-width: 200px; border-radius: 8px;">`;
+            } else {
+                messageContent = `<p>${msg.content}</p>`;
+            }
 
             return `
                 <div class="message-item" style="display: flex; flex-direction: ${isMine ? 'row-reverse' : 'row'}; margin-bottom: 12px; padding: 0 12px;">
@@ -158,7 +207,6 @@ class ChatApp {
                         ${avatarContent}
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: ${isMine ? 'flex-end' : 'flex-start'}; max-width: 70%;">
-                        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${isMine ? '我' : msg.senderName}</div>
                         <div style="background: ${isMine ? 'linear-gradient(135deg, var(--talk-blue), var(--talk-dark-blue))' : 'var(--white)'}; color: ${isMine ? 'white' : 'var(--text-primary)'}; padding: 10px 14px; border-radius: ${isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px'}; box-shadow: var(--shadow-sm);">
                             ${messageContent}
                         </div>
@@ -198,6 +246,47 @@ class ChatApp {
             input.value = '';
             this.renderGroupMessages();
         }
+    }
+
+    async handleGroupImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const result = await this.fetchData('/api/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (result.success) {
+            // 发送图片消息
+            this.setButtonLoading('send-group-btn', true);
+            const sendResult = await this.fetchData('/api/group/message', {
+                method: 'POST',
+                body: JSON.stringify({
+                    groupId: this.currentGroup.id,
+                    senderId: this.currentUser.id,
+                    content: result.url,
+                    type: 'image'
+                })
+            });
+            this.setButtonLoading('send-group-btn', false);
+
+            if (sendResult.success) {
+                if (!this.groupMessages[this.currentGroup.id]) {
+                    this.groupMessages[this.currentGroup.id] = [];
+                }
+                this.groupMessages[this.currentGroup.id].push(sendResult.message);
+                this.renderGroupMessages();
+            }
+        } else {
+            alert(result.message || '上传图片失败');
+        }
+
+        // 清空文件输入
+        e.target.value = '';
     }
 
     async showGroupInfo() {
@@ -492,13 +581,17 @@ class ChatApp {
             await this.loadGroupMessages(group.id);
         }
         
-        // 重新渲染聊天列表
-        this.renderChatList();
-        
-        // 如果在群聊界面，重新渲染群消息
+        // 如果在群聊界面，重新加载群成员和渲染消息
         if (this.currentGroup) {
+            const membersResult = await this.fetchData(`/api/group/${this.currentGroup.id}/members`);
+            if (membersResult.success) {
+                this.currentGroupMembers = membersResult.members;
+            }
             this.renderGroupMessages();
         }
+        
+        // 重新渲染聊天列表
+        this.renderChatList();
     }
 
     stopPolling() {
