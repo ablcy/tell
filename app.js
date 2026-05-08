@@ -1528,7 +1528,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v3.0.1';
+            updateTitle.textContent = t.updateLog + ' v4.3.0';
         }
 
         // 个人页
@@ -1561,11 +1561,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'YanTalk v3.0.1';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.3.0';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v3.0.1';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.3.0';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
