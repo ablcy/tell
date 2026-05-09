@@ -242,8 +242,8 @@ app.post('/api/register', async (req, res) => {
     return res.status(400).json({ success: false, message: '用户名和密码不能为空' });
   }
 
-  if (username.length < 3) {
-    return res.status(400).json({ success: false, message: '用户名至少需要3个字符' });
+  if (username.length < 2) {
+    return res.status(400).json({ success: false, message: '用户名至少需要2个字符' });
   }
 
   try {
@@ -898,8 +898,8 @@ app.post('/api/change-username', async (req, res) => {
     return res.status(400).json({ success: false, message: '参数错误' });
   }
 
-  if (username.length < 3) {
-    return res.status(400).json({ success: false, message: '账号至少需要3个字符' });
+  if (username.length < 2) {
+    return res.status(400).json({ success: false, message: '账号至少需要2个字符' });
   }
 
   if (username.length > 20) {
