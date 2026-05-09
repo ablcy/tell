@@ -945,38 +945,59 @@ class ChatApp {
             return;
         }
         
-        // 极致优化：使用字符串拼接 + 分批渲染
-        const totalItems = this.groups.length + this.friends.length;
-        const batchSize = 5; // 每批渲染5个
-        let currentIndex = 0;
+        // 极致优化：直接一次性渲染所有内容（数据量不大时最快）
         let html = '';
         
-        // 生成所有HTML字符串（字符串拼接是最快的方式）
-        const allHtml = this._generateChatListHtml();
-        
-        // 分批渲染，避免阻塞主线程
-        const renderBatch = () => {
-            const endIndex = Math.min(currentIndex + batchSize, allHtml.length);
+        // 群聊HTML生成
+        for (let i = 0; i < this.groups.length; i++) {
+            const group = this.groups[i];
+            const groupMsgs = this.groupMessages[group.id];
+            const lastMsg = groupMsgs && groupMsgs.length ? groupMsgs[groupMsgs.length - 1] : null;
             
-            // 追加当前批次的HTML
-            for (let i = currentIndex; i < endIndex; i++) {
-                html += allHtml[i];
+            let avatarHtml = '';
+            if (group.avatar && group.avatar.trim()) {
+                avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden;"><img src="${group.avatar}" alt="" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+            } else {
+                avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500;">G</div>`;
             }
             
-            // 更新DOM
-            chatList.innerHTML = html;
-            
-            currentIndex = endIndex;
-            
-            // 如果还有更多，继续渲染
-            if (currentIndex < allHtml.length) {
-                // 使用requestAnimationFrame确保流畅
-                requestAnimationFrame(renderBatch);
-            }
-        };
+            html += `<div class="chat-item group-item" data-group-id="${group.id}" onclick="app.openGroupChat('${group.id}')">
+                <div class="avatar">${avatarHtml}</div>
+                <div class="chat-info">
+                    <div class="chat-name">${group.name}${group.role === 'owner' ? ' (群主)' : ''}</div>
+                    <div class="chat-preview">${lastMsg ? lastMsg.content : '暂无消息'}</div>
+                </div>
+                <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}</div>
+            </div>`;
+        }
         
-        // 立即开始渲染
-        renderBatch();
+        // 好友HTML生成
+        for (let i = 0; i < this.friends.length; i++) {
+            const friend = this.friends[i];
+            const friendMsgs = this.messages[friend.id];
+            const lastMsg = friendMsgs && friendMsgs.length ? friendMsgs[friendMsgs.length - 1] : null;
+            const unread = this.getUnreadCount(friend.id);
+            
+            let avatarHtml = '';
+            if (friend.avatar && friend.avatar.trim()) {
+                avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden;"><img src="${friend.avatar}" alt="" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+            } else {
+                const initial = friend.username ? friend.username.charAt(0).toUpperCase() : '?';
+                avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500;">${initial}</div>`;
+            }
+            
+            html += `<div class="chat-item" data-friend-id="${friend.id}" onclick="app.openChat('${friend.id}')">
+                <div class="avatar">${avatarHtml}</div>
+                <div class="chat-info">
+                    <div class="chat-name">${friend.username}</div>
+                    <div class="chat-preview">${lastMsg ? (lastMsg.type === 'image' ? '[图片]' : lastMsg.content) : '暂无消息'}</div>
+                </div>
+                <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}</div>
+            </div>`;
+        }
+        
+        // 直接一次性更新DOM（最快的方式）
+        chatList.innerHTML = html;
     }
     
     _generateChatListHtml() {
@@ -1707,7 +1728,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v4.4.19';
+            updateTitle.textContent = t.updateLog + ' v4.4.20';
         }
 
         // 个人页
@@ -1740,11 +1761,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.4.19';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.4.20';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.4.19';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.4.20';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
