@@ -397,6 +397,56 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ success: false, message: '用户名或密码错误' });
     }
 
+    // 批量加载好友和群聊数据
+    const userId = userData.id;
+    
+    let friendsData = [];
+    let groupsData = [];
+    
+    // 并行加载好友和群聊
+    if (DATABASE_URL) {
+      const [friendsResult, groupMembersResult] = await Promise.all([
+        usersDB.query(
+          `SELECT u.id, u.username, u.avatar, u.nickname 
+           FROM friendships f
+           JOIN users u ON f.friend_id = u.id
+           WHERE f.user_id = $1`,
+          [userId]
+        ),
+        usersDB.query(
+          `SELECT gm.group_id, g.group_number, g.name, g.avatar, g.owner_id
+           FROM group_members gm
+           JOIN "groups" g ON gm.group_id = g.id
+           WHERE gm.user_id = $1`,
+          [userId]
+        )
+      ]);
+      friendsData = friendsResult.rows;
+      groupsData = groupMembersResult.rows.map(g => ({
+        id: g.group_id,
+        group_number: g.group_number,
+        name: g.name,
+        avatar: g.avatar,
+        owner_id: g.owner_id
+      }));
+    } else {
+      const [friendships, groupMembers] = await Promise.all([
+        promisifyDB(friendshipsDB.find).call(friendshipsDB, { user_id: userId }),
+        promisifyDB(groupMembersDB.find).call(groupMembersDB, { user_id: userId })
+      ]);
+      
+      const friendIds = friendships.map(f => f.friend_id);
+      const groupIds = groupMembers.map(g => g.group_id);
+      
+      const [friends, groups] = await Promise.all([
+        promisifyDB(usersDB.find).call(usersDB, { id: { $in: friendIds } }),
+        promisifyDB(groupsDB.find).call(groupsDB, { id: { $in: groupIds } })
+      ]);
+      
+      friendsData = friends.map(f => ({ ...f, nickname: f.nickname || '' }));
+      groupsData = groups;
+    }
+
     res.json({ 
       success: true, 
       user: { 
@@ -404,7 +454,9 @@ app.post('/api/login', async (req, res) => {
         username: userData.username,
         avatar: userData.avatar || null,
         nickname: userData.nickname || ''
-      } 
+      },
+      friends: friendsData,
+      groups: groupsData
     });
   } catch (error) {
     console.error('Login error:', error);
