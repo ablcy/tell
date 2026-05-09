@@ -1165,7 +1165,7 @@ app.post('/api/group/invite', async (req, res) => {
 app.put('/api/group/:groupId', async (req, res) => {
   try {
     const { groupId } = req.params;
-    const { userId, groupNumber, avatar } = req.body;
+    const { userId, groupNumber, avatar, name } = req.body;
 
     if (!groupId || !userId) {
       return res.status(400).json({ success: false, message: '参数不完整' });
@@ -1219,6 +1219,10 @@ app.put('/api/group/:groupId', async (req, res) => {
         updateFields.push(`avatar = $${paramIndex++}`);
         updateValues.push(avatar);
       }
+      if (name) {
+        updateFields.push(`name = $${paramIndex++}`);
+        updateValues.push(name);
+      }
 
       if (updateFields.length === 0) {
         return res.status(400).json({ success: false, message: '没有要更新的内容' });
@@ -1238,6 +1242,7 @@ app.put('/api/group/:groupId', async (req, res) => {
       const updateData = {};
       if (groupNumber) updateData.group_number = groupNumber;
       if (avatar !== undefined) updateData.avatar = avatar;
+      if (name) updateData.name = name;
       await promisifyDB(groupsDB.update).call(groupsDB, { id: groupId }, { $set: updateData });
 
       // 获取更新后的群信息
