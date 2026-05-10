@@ -1938,7 +1938,7 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.5.5';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.5.7';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
