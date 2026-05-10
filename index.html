@@ -38,7 +38,7 @@
                 </form>
 
                 <div class="version-info">
-                    <span>v4.4.21</span>
+                    <span>v4.4.23</span>
                     <span class="copyright">© 2026 Li Chengyan. All Rights Reserved.</span>
                 </div>
             </div>
@@ -76,6 +76,30 @@
                         </div>
                     </div>
 
+                    <div id="tab-contacts" class="tab-content">
+                        <div class="contacts-header">
+                            <div class="contacts-section">
+                                <div class="contacts-section-title">🔍 新的朋友</div>
+                                <div class="contact-item" id="add-friend-entry">
+                                    <div class="avatar" style="background: linear-gradient(135deg, #00D95E, #00B84D);">+</div>
+                                    <div class="contact-info">
+                                        <div class="contact-name">添加好友</div>
+                                        <div class="contact-desc">输入账号搜索添加</div>
+                                    </div>
+                                    <span class="arrow">›</span>
+                                </div>
+                            </div>
+                            <div class="contacts-section">
+                                <div class="contacts-section-title">👥 我的群聊</div>
+                                <div id="contacts-group-list" class="contacts-group-list"></div>
+                            </div>
+                            <div class="contacts-section">
+                                <div class="contacts-section-title">👤 好友列表</div>
+                                <div id="contacts-friend-list" class="contacts-friend-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="tab-discover" class="tab-content">
                         <div class="discover-list">
                             <div class="discover-item" id="share-app-btn">
@@ -103,10 +127,11 @@
                         <div class="update-info">
                             <div class="update-header" id="update-header" style="cursor: pointer;">
                                 <img src="logo.jpg" alt="Tell Logo" class="update-logo">
-                                <h3>更新日志 v4.4.21</h3>
+                                <h3>更新日志 v4.4.23</h3>
                                 <span class="toggle-arrow">▼</span>
                             </div>
                             <div class="update-content" id="update-content" style="display: none;">
+                                <div class="update-item">✨ v4.4.23: 添加通讯录导航栏，参考微信图标设计，实现点击填充效果</div>
                                 <div class="update-item">✨ v4.4.21: 群聊界面优化，输入框与好友聊天一致，三点按钮移至右上角</div>
                                 <div class="update-item">✨ v4.4.20: 极致优化渲染性能，直接一次性字符串拼接渲染，最快显示速度</div>
                                 <div class="update-item">✨ v4.4.19: 极致优化列表渲染，使用requestAnimationFrame分批渲染，确保1秒内显示好友和群聊</div>
@@ -190,7 +215,7 @@
                             </div>
                         </div>
                         <div class="footer-info">
-                            <p>Tell v4.4.21</p>
+                            <p>Tell v4.4.23</p>
                             <p class="copyright">© 2026 Li Chengyan. All Rights Reserved.</p>
                             <p id="uptime-display" class="uptime"></p>
                         </div>
@@ -199,16 +224,32 @@
 
                 <nav class="bottom-nav">
                     <div class="nav-item active" data-tab="chats">
-                        <span class="nav-icon">💬</span>
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
                         <span>消息</span>
                     </div>
+                    <div class="nav-item" data-tab="contacts">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>通讯录</span>
+                    </div>
                     <div class="nav-item" data-tab="discover">
-                        <span class="nav-icon">🔍</span>
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="6"/>
+                            <circle cx="12" cy="12" r="2"/>
+                        </svg>
                         <span>发现</span>
                     </div>
                     <div class="nav-item" data-tab="me">
-                        <span class="nav-icon">👤</span>
-                        <span>个人</span>
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>我</span>
                     </div>
                 </nav>
             </div>

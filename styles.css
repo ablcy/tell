@@ -381,14 +381,29 @@ form button[type="submit"]:hover {
     cursor: pointer;
     color: var(--text-secondary);
     transition: color 0.3s;
+    flex: 1;
 }
 
 .nav-item.active {
     color: var(--talk-blue);
 }
 
+.nav-item.active svg.nav-icon {
+    fill: var(--talk-blue);
+}
+
 .nav-icon {
-    font-size: 1.4rem;
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+}
+
+.nav-item svg.nav-icon {
+    fill: none;
+}
+
+.nav-item.active svg.nav-icon {
+    fill: var(--talk-blue);
 }
 
 .nav-item span:last-child {
@@ -1162,4 +1177,81 @@ body.dark-mode .toggle-slider {
 .invite-friend-item input[type="checkbox"] {
     width: 18px;
     height: 18px;
+}
+
+.contacts-header {
+    padding: 10px 0;
+}
+
+.contacts-section {
+    margin-bottom: 20px;
+}
+
+.contacts-section-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+.contacts-header .contact-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.contacts-header .contact-item:hover {
+    background: #FAFAFA;
+    transform: none;
+    box-shadow: none;
+}
+
+.contacts-header .contact-item .avatar {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.contact-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.contacts-group-list,
+.contacts-friend-list {
+    background: var(--white);
+}
+
+.contacts-group-list .contact-item,
+.contacts-friend-list .contact-item {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 16px;
+}
+
+.contacts-group-list .contact-item:hover,
+.contacts-friend-list .contact-item:hover {
+    background: #FAFAFA;
+    transform: none;
+    box-shadow: none;
 }
