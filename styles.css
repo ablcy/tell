@@ -279,7 +279,19 @@ form button[type="submit"]:hover {
     padding: 0;
 }
 
-.chat-item,
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--white);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
 .contact-item {
     display: flex;
     align-items: center;
@@ -293,7 +305,10 @@ form button[type="submit"]:hover {
     box-shadow: var(--shadow-sm);
 }
 
-.chat-item:hover,
+.chat-item:hover {
+    background: #FAFAFA;
+}
+
 .contact-item:hover {
     background: #FAFAFA;
     transform: translateY(-2px);
