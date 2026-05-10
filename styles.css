@@ -247,6 +247,7 @@ form button[type="submit"]:hover {
 
 .tab-content {
     display: none;
+    position: relative;
 }
 
 .tab-content.active {
@@ -453,7 +454,7 @@ form button[type="submit"]:hover {
     background: var(--white);
     display: flex;
     justify-content: space-around;
-    padding: 12px 0 20px;
+    padding: 8px 0 15px;
     border-top: none;
     z-index: 1000;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
