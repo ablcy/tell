@@ -1947,11 +1947,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.5.7';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.5.9';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.5.8';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.5.9';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
