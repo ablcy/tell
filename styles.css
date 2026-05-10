@@ -275,9 +275,13 @@ form button[type="submit"]:hover {
 }
 
 .tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     background: var(--white);
+    position: relative;
 }
 
 .tab-header h2 {
@@ -285,6 +289,57 @@ form button[type="submit"]:hover {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+}
+
+.tab-plus-btn {
+    position: absolute;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--white);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.tab-plus-btn:hover {
+    background: #f0f0f0;
+}
+
+.tab-plus-menu {
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    z-index: 100;
+    min-width: 160px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background: #f5f5f5;
+}
+
+.menu-icon {
+    margin-right: 8px;
+    font-size: 1rem;
 }
 
 .chat-list,

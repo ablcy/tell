@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="deploy-trigger" content="v4.6.7-force">
+    <meta name="deploy-trigger" content="v4.6.8-force">
     <title>Tell - 即时聊天</title>
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
@@ -39,7 +39,7 @@
                 </form>
 
                 <div class="version-info">
-                    <span>v4.6.7</span>
+                    <span>v4.6.8</span>
                     <span class="copyright">© 2026 Li Chengyan. All Rights Reserved.</span>
                 </div>
             </div>
@@ -51,10 +51,16 @@
                     <div id="tab-chats" class="tab-content active">
                         <div class="tab-header">
                             <h2>消息</h2>
+                            <button id="tab-plus-btn" class="tab-plus-btn">+</button>
+                        </div>
+                        <div class="tab-plus-menu" id="tab-plus-menu" style="display: none;">
+                            <div class="menu-item" id="create-group-menu-item">
+                                <span class="menu-icon">👥</span>
+                                <span>发起群聊</span>
+                            </div>
                         </div>
                         <div class="search-bar">
                             <input type="text" placeholder="搜索好友/群号" id="search-input">
-                            <button id="create-group-btn" class="create-group-btn">+建群</button>
                         </div>
                         <div id="search-result" class="search-result" style="display: none;">
                             <div class="search-result-item" id="search-result-item-friend" style="display: none;">
@@ -83,6 +89,7 @@
                     <div id="tab-contacts" class="tab-content">
                         <div class="tab-header">
                             <h2>通讯录</h2>
+                            <button id="contacts-plus-btn" class="tab-plus-btn">+</button>
                         </div>
                         <div class="contacts-header">
                             <div class="contacts-section">
@@ -111,6 +118,7 @@
                     <div id="tab-discover" class="tab-content">
                         <div class="tab-header">
                             <h2>发现</h2>
+                            <button id="discover-plus-btn" class="tab-plus-btn">+</button>
                         </div>
                         <div class="discover-list">
                             <div class="discover-item" id="share-app-btn">
@@ -138,11 +146,11 @@
                         <div class="update-info">
                             <div class="update-header" id="update-header" style="cursor: pointer;">
                                 <img src="logo.jpg" alt="Tell Logo" class="update-logo">
-                                <h3>更新日志 v4.6.7</h3>
+                                <h3>更新日志 v4.6.8</h3>
                                 <span class="toggle-arrow">▼</span>
                             </div>
                             <div class="update-content" id="update-content" style="display: none;">
-                                <div class="update-item">✨ v4.6.7: 消息、通讯录、发现三个界面添加标题栏</div>
+                                <div class="update-item">✨ v4.6.8: 标题栏文字居中，右侧添加加号按钮，建群功能移至加号菜单</div>
                                 <div class="update-item">✨ v4.5.4: 新增好友设置功能，支持删除好友和阅后即焚功能</div>
                                 <div class="update-item">✨ v4.5.3: 新增解散群聊功能，群主可在群设置界面解散群聊</div>
                                 <div class="update-item">✨ v4.5.2: 修复退出登录后隐私泄露问题，退出时彻底清空所有用户数据和界面内容</div>
@@ -231,7 +239,7 @@
                             </div>
                         </div>
                         <div class="footer-info">
-                            <p>Tell v4.6.7</p>
+                            <p>Tell v4.6.8</p>
                             <p class="copyright">© 2026 Li Chengyan. All Rights Reserved.</p>
                             <p id="uptime-display" class="uptime"></p>
                         </div>

@@ -52,7 +52,10 @@ class ChatApp {
     }
 
     initGroupEvents() {
-        document.getElementById('create-group-btn').addEventListener('click', () => this.showCreateGroupModal());
+        document.getElementById('create-group-menu-item').addEventListener('click', () => {
+            this.showCreateGroupModal();
+            this.closeTabPlusMenu();
+        });
         document.getElementById('close-create-group-modal').addEventListener('click', () => this.closeCreateGroupModal());
         document.getElementById('confirm-create-group-btn').addEventListener('click', () => this.createGroup());
 
@@ -62,6 +65,23 @@ class ChatApp {
         });
 
         document.getElementById('contacts-create-group-btn').addEventListener('click', () => this.showCreateGroupModal());
+
+        document.getElementById('tab-plus-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleTabPlusMenu();
+        });
+
+        document.getElementById('contacts-plus-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeTabPlusMenu();
+        });
+
+        document.getElementById('discover-plus-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeTabPlusMenu();
+        });
+
+        document.addEventListener('click', () => this.closeTabPlusMenu());
 
         document.getElementById('close-group-info-modal').addEventListener('click', () => this.closeGroupInfoModal());
         document.getElementById('invite-friends-btn').addEventListener('click', () => this.showInviteFriendsModal());
@@ -117,6 +137,16 @@ class ChatApp {
 
     closeCreateGroupModal() {
         document.getElementById('create-group-modal').style.display = 'none';
+    }
+
+    toggleTabPlusMenu() {
+        const menu = document.getElementById('tab-plus-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    closeTabPlusMenu() {
+        const menu = document.getElementById('tab-plus-menu');
+        menu.style.display = 'none';
     }
 
     async createGroup() {
@@ -1966,7 +1996,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v4.6.7';
+            updateTitle.textContent = t.updateLog + ' v4.6.8';
         }
 
         // 个人页
@@ -1999,11 +2029,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.6.7';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.6.8';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.6.7';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.6.8';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
