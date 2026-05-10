@@ -1255,3 +1255,78 @@ body.dark-mode .toggle-slider {
     transform: none;
     box-shadow: none;
 }
+
+.contacts-actions {
+    display: flex;
+    gap: 20px;
+    padding: 16px;
+    background: var(--white);
+}
+
+.contact-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.contact-action-item .action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.contact-action-item span {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+.contacts-list {
+    background: var(--white);
+}
+
+.contacts-list .contact-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.contacts-list .contact-item:hover {
+    background: #FAFAFA;
+}
+
+.contacts-list .contact-item .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 500;
+    overflow: hidden;
+}
+
+.contacts-list .contact-item .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contacts-list .contact-item .contact-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.95rem;
+}

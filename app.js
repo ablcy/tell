@@ -32,6 +32,13 @@ class ChatApp {
         document.getElementById('close-create-group-modal').addEventListener('click', () => this.closeCreateGroupModal());
         document.getElementById('confirm-create-group-btn').addEventListener('click', () => this.createGroup());
 
+        document.getElementById('contacts-add-friend-btn').addEventListener('click', () => {
+            document.getElementById('search-input').focus();
+            this.switchTab('chats');
+        });
+
+        document.getElementById('contacts-create-group-btn').addEventListener('click', () => this.showCreateGroupModal());
+
         document.getElementById('close-group-info-modal').addEventListener('click', () => this.closeGroupInfoModal());
         document.getElementById('invite-friends-btn').addEventListener('click', () => this.showInviteFriendsModal());
         document.getElementById('close-invite-modal').addEventListener('click', () => this.closeInviteFriendsModal());
@@ -927,6 +934,7 @@ class ChatApp {
 
         const titles = {
             chats: 'Tell',
+            contacts: '通讯录',
             discover: '发现',
             me: '我'
         };
@@ -934,6 +942,57 @@ class ChatApp {
 
         if (tab === 'chats') {
             this.renderChatList();
+        } else if (tab === 'contacts') {
+            this.renderContacts();
+        }
+    }
+
+    renderContacts() {
+        const groupsSection = document.getElementById('contacts-groups-section');
+        const friendsSection = document.getElementById('contacts-friends-section');
+        const groupList = document.getElementById('contacts-group-list');
+        const friendList = document.getElementById('contacts-friend-list');
+
+        if (this.groups.length > 0) {
+            groupsSection.style.display = 'block';
+            groupList.innerHTML = this.groups.map(group => `
+                <div class="contact-item" data-group-id="${group.id}">
+                    <div class="avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        ${group.avatar ? `<img src="${group.avatar}" alt="">` : '群'}
+                    </div>
+                    <span class="contact-name">${group.name || group.account}</span>
+                </div>
+            `).join('');
+
+            groupList.querySelectorAll('.contact-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const groupId = item.dataset.groupId;
+                    this.openGroupChat(groupId);
+                });
+            });
+        } else {
+            groupsSection.style.display = 'none';
+        }
+
+        if (this.friends.length > 0) {
+            friendsSection.style.display = 'block';
+            friendList.innerHTML = this.friends.map(friend => `
+                <div class="contact-item" data-friend-id="${friend.id}">
+                    <div class="avatar" style="background: linear-gradient(135deg, var(--talk-blue), var(--talk-dark-blue));">
+                        ${friend.avatar ? `<img src="${friend.avatar}" alt="">` : (friend.nickname || friend.username).charAt(0).toUpperCase()}
+                    </div>
+                    <span class="contact-name">${friend.nickname || friend.username}</span>
+                </div>
+            `).join('');
+
+            friendList.querySelectorAll('.contact-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const friendId = item.dataset.friendId;
+                    this.openChat(friendId);
+                });
+            });
+        } else {
+            friendsSection.style.display = 'none';
         }
     }
 
