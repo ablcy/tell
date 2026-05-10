@@ -316,8 +316,9 @@ form button[type="submit"]:hover {
 
 .tab-plus-menu {
     position: absolute;
-    top: calc(100% + 4px);
-    right: 8px;
+    top: 100%;
+    right: 16px;
+    margin-top: 4px;
     background: var(--white);
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
