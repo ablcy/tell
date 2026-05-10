@@ -548,7 +548,8 @@ class ChatApp {
             
             // 并行加载好友和群聊
             Promise.all([this.loadFriends(), this.loadGroups()]).then(() => {
-                this.renderChatList(); // 加载完立即渲染
+                this.renderChatList(); // 加载完立即渲染消息列表
+                this.renderContacts(); // 同时渲染通讯录
                 
                 // 消息在后台异步加载
                 setTimeout(() => {
