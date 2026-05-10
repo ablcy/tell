@@ -1276,6 +1276,12 @@ class ChatApp {
         this.currentFriend = friend;
         document.getElementById('chat-friend-name').textContent = friend.username;
         document.getElementById('chat-view').style.display = 'flex';
+        
+        const shouldBurn = this.burnAfterReadingEnabled === friendId;
+        if (shouldBurn) {
+            this.messages[friendId] = [];
+        }
+        
         this.renderMessages();
         this.markMessagesAsRead(friendId);
         
