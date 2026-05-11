@@ -316,17 +316,17 @@ form button[type="submit"]:hover {
 
 .tab-plus-menu {
     position: absolute;
-    top: calc(100% + 2px);
-    right: 12px;
+    top: calc(100% + 6px);
+    right: 8px;
     margin-top: 0;
-    background: var(--white);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: #323232;
+    border-radius: 6px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     z-index: 100;
     min-width: 160px;
     opacity: 0;
-    transform: translateY(0) scale(0.98);
+    transform: translateY(-4px) scale(0.95);
     transform-origin: top right;
     transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
@@ -339,18 +339,20 @@ form button[type="submit"]:hover {
 .menu-item {
     display: flex;
     align-items: center;
-    padding: 10px 16px;
+    padding: 13px 16px;
     cursor: pointer;
     transition: background 0.2s;
+    color: #ffffff;
+    font-size: 0.95rem;
 }
 
 .menu-item:hover {
-    background: #f5f5f5;
+    background: #4a4a4a;
 }
 
 .menu-icon {
-    margin-right: 8px;
-    font-size: 1rem;
+    margin-right: 12px;
+    font-size: 1.1rem;
 }
 
 .chat-list,
