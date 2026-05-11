@@ -767,29 +767,39 @@ class ChatApp {
         if (storedUser) {
             this.currentUser = JSON.parse(storedUser);
             
-            try {
-                const result = await this.fetchData('/api/verify', {
-                    method: 'POST',
-                    body: JSON.stringify({ userId: this.currentUser.id, passwordVersion: this.currentUser.password_version })
-                });
-                
-                if (!result.success) {
-                    throw new Error(result.message || '登录状态已失效');
-                }
-            } catch (error) {
-                localStorage.removeItem('currentUser');
-                this.currentUser = null;
-                alert(error.message || '登录状态已失效，请重新登录');
-                return;
-            }
-            
-            // 先显示界面，给用户即时反馈
+            // 立即显示主界面，提供即时反馈
             this.showMainScreen();
             
-            // 并行加载好友和群聊
-            Promise.all([this.loadFriends(), this.loadGroups()]).then(() => {
-                this.renderChatList(); // 加载完立即渲染消息列表
-                this.renderContacts(); // 同时渲染通讯录
+            // 先尝试使用本地缓存渲染（如果有）
+            const cachedFriends = localStorage.getItem('cachedFriends');
+            const cachedGroups = localStorage.getItem('cachedGroups');
+            if (cachedFriends) {
+                this.friends = JSON.parse(cachedFriends);
+                this.renderChatList();
+                this.renderContacts();
+            }
+            if (cachedGroups) {
+                this.groups = JSON.parse(cachedGroups);
+                if (this.friends.length > 0) {
+                    this.renderChatList();
+                }
+                this.renderContacts();
+            }
+            
+            // 后台并行验证用户和加载数据
+            Promise.all([
+                this.verifyUser().catch(err => {
+                    console.error('Verification failed:', err);
+                }),
+                this.loadFriends().then(() => {
+                    localStorage.setItem('cachedFriends', JSON.stringify(this.friends));
+                }),
+                this.loadGroups().then(() => {
+                    localStorage.setItem('cachedGroups', JSON.stringify(this.groups));
+                })
+            ]).then(() => {
+                this.renderChatList();
+                this.renderContacts();
                 
                 // 消息在后台异步加载
                 setTimeout(() => {
@@ -798,6 +808,25 @@ class ChatApp {
                     this.startPasswordVersionCheck();
                 }, 100);
             });
+        }
+    }
+    
+    async verifyUser() {
+        try {
+            const result = await this.fetchData('/api/verify', {
+                method: 'POST',
+                body: JSON.stringify({ userId: this.currentUser.id, passwordVersion: this.currentUser.password_version })
+            });
+            
+            if (!result.success) {
+                throw new Error(result.message || '登录状态已失效');
+            }
+        } catch (error) {
+            localStorage.removeItem('currentUser');
+            this.currentUser = null;
+            this.showAuthScreen();
+            alert(error.message || '登录状态已失效，请重新登录');
+            throw error;
         }
     }
 
@@ -1003,11 +1032,14 @@ class ChatApp {
 
             if (result.friends) {
                 this.friends = result.friends;
+                localStorage.setItem('cachedFriends', JSON.stringify(result.friends));
             }
             if (result.groups) {
                 this.groups = result.groups;
+                localStorage.setItem('cachedGroups', JSON.stringify(result.groups));
             }
 
+            // 立即显示主界面
             this.showMainScreen();
             this.updateProfile();
             this.renderChatList();
@@ -1015,6 +1047,7 @@ class ChatApp {
 
             this.setButtonLoading('login-form-submit-btn', false);
 
+            // 后台异步加载其他内容
             setTimeout(() => {
                 this.loadMessages();
                 this.startPolling();
@@ -1026,9 +1059,15 @@ class ChatApp {
         }
     }
 
+    showAuthScreen() {
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('main-screen').style.display = 'none';
+    }
+
     showMainScreen() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'flex';
+        this.updateProfile();
     }
 
     async handleRegister(e) {
@@ -1062,22 +1101,28 @@ class ChatApp {
             }
             this.friends = [];
             this.messages = {};
-            this.loadFriends().then(() => {
+            
+            // 立即显示界面
+            this.showMainScreen();
+            
+            // 后台加载数据
+            Promise.all([
+                this.loadFriends().then(() => {
+                    localStorage.setItem('cachedFriends', JSON.stringify(this.friends));
+                }),
+                this.loadGroups().then(() => {
+                    localStorage.setItem('cachedGroups', JSON.stringify(this.groups));
+                })
+            ]).then(() => {
+                this.renderChatList();
+                this.renderContacts();
                 this.loadMessages();
             });
-            this.showMainScreen();
+            
             this.startPolling();
         } else {
             document.getElementById('register-error').textContent = result.message || '注册失败';
         }
-    }
-
-    showMainScreen() {
-        document.getElementById('auth-screen').classList.remove('screen');
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-screen').style.display = 'flex';
-        this.updateProfile();
-        this.renderChatList();
     }
 
     updateProfile() {
@@ -1860,6 +1905,9 @@ class ChatApp {
             this.stopPolling();
             this.stopPasswordVersionCheck();
             localStorage.removeItem('currentUser');
+            localStorage.removeItem('cachedFriends');
+            localStorage.removeItem('cachedGroups');
+            localStorage.removeItem('burnAfterReading');
             this.currentUser = null;
             this.currentFriend = null;
             this.currentGroup = null;
@@ -2135,7 +2183,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v5.0.0';
+            updateTitle.textContent = t.updateLog + ' v5.1.0';
         }
 
         // 个人页
@@ -2168,11 +2216,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.0.0';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.1.0';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v5.0.0';
+        document.querySelector('.version-info span:first-child').textContent = 'v5.1.0';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
