@@ -767,6 +767,21 @@ class ChatApp {
         if (storedUser) {
             this.currentUser = JSON.parse(storedUser);
             
+            try {
+                const result = await this.fetchData('/api/verify', {
+                    method: 'POST',
+                    body: JSON.stringify({ userId: this.currentUser.id })
+                });
+                
+                if (!result.success) {
+                    throw new Error('登录状态已失效');
+                }
+            } catch (error) {
+                localStorage.removeItem('currentUser');
+                this.currentUser = null;
+                return;
+            }
+            
             // 先显示界面，给用户即时反馈
             this.showMainScreen();
             

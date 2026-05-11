@@ -412,6 +412,34 @@ async function addSelfAsFriend(userId) {
   console.log(`Self friendship added for user ${userId}`);
 }
 
+app.post('/api/verify', async (req, res) => {
+  const { userId } = req.body;
+  
+  if (!userId) {
+    return res.status(400).json({ success: false, message: '用户ID不能为空' });
+  }
+
+  try {
+    let user;
+    if (DATABASE_URL) {
+      user = await usersDB.query('SELECT id, username FROM users WHERE id = $1', [userId]);
+    } else {
+      user = await promisifyDB(usersDB.find).call(usersDB, { id: userId });
+    }
+
+    const userData = DATABASE_URL ? user.rows[0] : user[0];
+
+    if (!userData) {
+      return res.status(401).json({ success: false, message: '用户不存在' });
+    }
+
+    res.json({ success: true, user: { id: userData.id, username: userData.username } });
+  } catch (error) {
+    console.error('Verify user error:', error);
+    res.status(500).json({ success: false, message: '验证失败' });
+  }
+});
+
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 

@@ -14,6 +14,10 @@ class AdminPanel {
     bindPasswordEvents() {
         const passwordForm = document.getElementById('password-form');
         passwordForm.addEventListener('submit', (e) => this.handlePasswordSubmit(e));
+        
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
     }
 
     async handlePasswordSubmit(e) {
