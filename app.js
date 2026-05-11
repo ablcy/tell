@@ -1239,14 +1239,13 @@ class ChatApp {
             return;
         }
         
-        // 极致优化：直接一次性渲染所有内容（数据量不大时最快）
-        let html = '';
+        const chatItems = [];
         
-        // 群聊HTML生成
         for (let i = 0; i < this.groups.length; i++) {
             const group = this.groups[i];
             const groupMsgs = this.groupMessages[group.id];
             const lastMsg = groupMsgs && groupMsgs.length ? groupMsgs[groupMsgs.length - 1] : null;
+            const lastTimestamp = lastMsg && lastMsg.timestamp ? lastMsg.timestamp : 0;
             
             let avatarHtml = '';
             if (group.avatar && group.avatar.trim()) {
@@ -1255,22 +1254,24 @@ class ChatApp {
                 avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500;">G</div>`;
             }
             
-            html += `<div class="chat-item group-item" data-group-id="${group.id}" onclick="app.openGroupChat('${group.id}')">
-                <div class="avatar">${avatarHtml}</div>
-                <div class="chat-info">
-                    <div class="chat-name">${group.name}${group.role === 'owner' ? ' (群主)' : ''}</div>
-                    <div class="chat-preview">${lastMsg ? lastMsg.content : '暂无消息'}</div>
-                </div>
-                <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}</div>
-            </div>`;
+            chatItems.push({
+                type: 'group',
+                id: group.id,
+                name: group.name,
+                role: group.role,
+                avatarHtml,
+                lastMsg,
+                lastTimestamp,
+                isGroup: true
+            });
         }
         
-        // 好友HTML生成
         for (let i = 0; i < this.friends.length; i++) {
             const friend = this.friends[i];
             const friendMsgs = this.messages[friend.id];
             const lastMsg = friendMsgs && friendMsgs.length ? friendMsgs[friendMsgs.length - 1] : null;
             const unread = this.getUnreadCount(friend.id);
+            const lastTimestamp = lastMsg && lastMsg.timestamp ? lastMsg.timestamp : 0;
             
             let avatarHtml = '';
             if (friend.avatar && friend.avatar.trim()) {
@@ -1280,17 +1281,43 @@ class ChatApp {
                 avatarHtml = `<div style="width: 100%; height: 100%; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500;">${initial}</div>`;
             }
             
-            html += `<div class="chat-item" data-friend-id="${friend.id}" onclick="app.openChat('${friend.id}')">
-                <div class="avatar">${avatarHtml}</div>
-                <div class="chat-info">
-                    <div class="chat-name">${friend.id === this.currentUser?.id ? friend.username + ' (我)' : friend.username}</div>
-                    <div class="chat-preview">${lastMsg ? (lastMsg.type === 'image' ? '[图片]' : lastMsg.content) : '暂无消息'}</div>
-                </div>
-                <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}</div>
-            </div>`;
+            chatItems.push({
+                type: 'friend',
+                id: friend.id,
+                username: friend.username,
+                avatarHtml,
+                lastMsg,
+                lastTimestamp,
+                unread,
+                isGroup: false
+            });
         }
         
-        // 直接一次性更新DOM（最快的方式）
+        chatItems.sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+        
+        let html = '';
+        for (const item of chatItems) {
+            if (item.isGroup) {
+                html += `<div class="chat-item group-item" data-group-id="${item.id}" onclick="app.openGroupChat('${item.id}')">
+                    <div class="avatar">${item.avatarHtml}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${item.name}${item.role === 'owner' ? ' (群主)' : ''}</div>
+                        <div class="chat-preview">${item.lastMsg ? item.lastMsg.content : '暂无消息'}</div>
+                    </div>
+                    <div>${item.lastMsg ? `<div class="chat-time">${item.lastMsg.time}</div>` : ''}</div>
+                </div>`;
+            } else {
+                html += `<div class="chat-item" data-friend-id="${item.id}" onclick="app.openChat('${item.id}')">
+                    <div class="avatar">${item.avatarHtml}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${item.id === this.currentUser?.id ? item.username + ' (我)' : item.username}</div>
+                        <div class="chat-preview">${item.lastMsg ? (item.lastMsg.type === 'image' ? '[图片]' : item.lastMsg.content) : '暂无消息'}</div>
+                    </div>
+                    <div>${item.lastMsg ? `<div class="chat-time">${item.lastMsg.time}</div>` : ''}${item.unread > 0 ? `<div class="unread-badge">${item.unread}</div>` : ''}</div>
+                </div>`;
+            }
+        }
+        
         chatList.innerHTML = html;
     }
     

@@ -58,7 +58,7 @@ class AdminPanel {
         this.loadStats();
         this.loadUsers();
         this.loadGroups();
-        this.addLog('Tell Admin v4.9.5 启动成功', '系统');
+        this.addLog('Tell Admin v4.9.6 启动成功', '系统');
     }
 
     bindEvents() {
