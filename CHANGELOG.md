@@ -6,6 +6,23 @@
 
 # 变更日志
 
+## [V4.8.0 202605111130] - 2026-05-11
+
+### 功能修复
+- 修复英文模式，添加缺失的翻译项：
+  - contacts: 通讯录 → Contacts
+  - addFriend: 添加好友 → Add Friend
+  - createGroup: 创建群聊 → Create Group
+  - startGroupChat: 发起群聊 → Start Group Chat
+  - myGroups: 我的群聊 → My Groups
+  - friendsList: 好友列表 → Friends List
+- 更新 translateUI 函数，增加通讯录页面、页面标题、加号菜单等的翻译
+
+### 版本信息
+- 状态：正式发布
+
+---
+
 ## [V4.7.9] - 2026-05-11
 
 ### 界面优化

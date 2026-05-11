@@ -1939,6 +1939,7 @@ class ChatApp {
             searchPlaceholder: '搜索好友/群聊',
             add: '添加',
             messages: '消息',
+            contacts: '通讯录',
             discover: '发现',
             me: '个人',
             shareApp: '分享应用',
@@ -1963,7 +1964,12 @@ class ChatApp {
             linkCopied: '链接已复制到剪贴板！',
             appName: 'Tell',
             appDesc: '即时通讯聊天工具',
-            copyright: '© 2026 Li Chengyan. All Rights Reserved.'
+            copyright: '© 2026 Li Chengyan. All Rights Reserved.',
+            addFriend: '添加好友',
+            createGroup: '创建群聊',
+            startGroupChat: '发起群聊',
+            myGroups: '我的群聊',
+            friendsList: '好友列表'
         },
         en: {
             login: 'Login',
@@ -1973,6 +1979,7 @@ class ChatApp {
             searchPlaceholder: 'Search friends/username',
             add: 'Add',
             messages: 'Messages',
+            contacts: 'Contacts',
             discover: 'Discover',
             me: 'Me',
             shareApp: 'Share App',
@@ -1997,7 +2004,12 @@ class ChatApp {
             linkCopied: 'Link copied to clipboard!',
             appName: 'Tell',
             appDesc: 'Instant Messaging Chat Tool',
-            copyright: '© 2026 Li Chengyan. All Rights Reserved.'
+            copyright: '© 2026 Li Chengyan. All Rights Reserved.',
+            addFriend: 'Add Friend',
+            createGroup: 'Create Group',
+            startGroupChat: 'Start Group Chat',
+            myGroups: 'My Groups',
+            friendsList: 'Friends List'
         }
     }
 
@@ -2041,8 +2053,33 @@ class ChatApp {
 
         // 导航栏
         document.querySelector('[data-tab="chats"] span:last-child').textContent = t.messages;
+        document.querySelector('[data-tab="contacts"] span:last-child').textContent = t.contacts;
         document.querySelector('[data-tab="discover"] span:last-child').textContent = t.discover;
         document.querySelector('[data-tab="me"] span:last-child').textContent = t.me;
+
+        // 页面标题
+        document.querySelector('#tab-chats .tab-header h2').textContent = t.messages;
+        document.querySelector('#tab-contacts .tab-header h2').textContent = t.contacts;
+        document.querySelector('#tab-discover .tab-header h2').textContent = t.discover;
+
+        // 通讯录页
+        document.querySelector('#contacts-add-friend-btn .contact-name').textContent = t.addFriend;
+        document.querySelector('#contacts-create-group-btn .contact-name').textContent = t.createGroup;
+
+        // 加号菜单 - 发起群聊
+        document.querySelector('#create-group-menu-item span:last-child').textContent = t.startGroupChat;
+        document.querySelector('#contacts-create-group-menu-item span:last-child').textContent = t.startGroupChat;
+        document.querySelector('#discover-create-group-menu-item span:last-child').textContent = t.startGroupChat;
+
+        // 通讯录分组标题
+        const groupSectionTitle = document.querySelector('#contacts-groups-section .contacts-section-title');
+        if (groupSectionTitle) {
+            groupSectionTitle.textContent = '👥 ' + t.myGroups;
+        }
+        const friendSectionTitle = document.querySelector('#contacts-friends-section .contacts-section-title');
+        if (friendSectionTitle) {
+            friendSectionTitle.textContent = '👤 ' + t.friendsList;
+        }
 
         // 发现页
         document.querySelector('#share-app-btn span:nth-child(2)').textContent = t.shareApp;
@@ -2056,7 +2093,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v4.7.9';
+            updateTitle.textContent = t.updateLog + ' v4.8.0';
         }
 
         // 个人页
@@ -2089,11 +2126,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.7.9';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.8.0';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.7.9';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.8.0';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
