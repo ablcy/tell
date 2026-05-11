@@ -991,8 +991,8 @@ class ChatApp {
             return;
         }
 
-        if (username.length < 2) {
-            document.getElementById('register-error').textContent = '用户名至少需要2个字符';
+        if (username.length < 1) {
+            document.getElementById('register-error').textContent = '用户名不能为空';
             return;
         }
 
@@ -2056,7 +2056,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v4.8.6';
+            updateTitle.textContent = t.updateLog + ' v4.8.7';
         }
 
         // 个人页
@@ -2089,11 +2089,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.8.6';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.8.7';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.8.6';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.8.7';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';

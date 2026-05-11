@@ -248,8 +248,8 @@ app.post('/api/register', async (req, res) => {
     return res.status(400).json({ success: false, message: '用户名和密码不能为空' });
   }
 
-  if (username.length < 2) {
-    return res.status(400).json({ success: false, message: '用户名至少需要2个字符' });
+  if (username.length < 1) {
+    return res.status(400).json({ success: false, message: '用户名不能为空' });
   }
 
   try {
