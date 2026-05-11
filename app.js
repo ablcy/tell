@@ -315,6 +315,10 @@ class ChatApp {
 
     async deleteFriend() {
         if (!this.currentFriend) return;
+        if (this.currentFriend.id === this.currentUser?.id) {
+            alert('无法删除自己');
+            return;
+        }
         if (!confirm(`确定要删除好友 ${this.currentFriend.username} 吗？`)) return;
 
         const result = await this.fetchData('/api/friend/delete', {
@@ -1232,7 +1236,7 @@ class ChatApp {
             html += `<div class="chat-item" data-friend-id="${friend.id}" onclick="app.openChat('${friend.id}')">
                 <div class="avatar">${avatarHtml}</div>
                 <div class="chat-info">
-                    <div class="chat-name">${friend.username}</div>
+                    <div class="chat-name">${friend.id === this.currentUser?.id ? friend.username + ' (我)' : friend.username}</div>
                     <div class="chat-preview">${lastMsg ? (lastMsg.type === 'image' ? '[图片]' : lastMsg.content) : '暂无消息'}</div>
                 </div>
                 <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}</div>
@@ -1288,7 +1292,7 @@ class ChatApp {
             len(`<div class="chat-item" data-friend-id="${friend.id}" onclick="app.openChat('${friend.id}')">
                 <div class="avatar">${avatarHtml}</div>
                 <div class="chat-info">
-                    <div class="chat-name">${friend.username}</div>
+                    <div class="chat-name">${friend.id === this.currentUser?.id ? friend.username + ' (我)' : friend.username}</div>
                     <div class="chat-preview">${lastMsg ? (lastMsg.type === 'image' ? '[图片]' : lastMsg.content) : '暂无消息'}</div>
                 </div>
                 <div>${lastMsg ? `<div class="chat-time">${lastMsg.time}</div>` : ''}${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}</div>
@@ -2056,7 +2060,7 @@ class ChatApp {
         // 更新日志
         const updateTitle = document.querySelector('#update-header h3');
         if (updateTitle) {
-            updateTitle.textContent = t.updateLog + ' v4.8.7';
+            updateTitle.textContent = t.updateLog + ' v4.8.8';
         }
 
         // 个人页
@@ -2089,11 +2093,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.8.7';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v4.8.8';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v4.8.7';
+        document.querySelector('.version-info span:first-child').textContent = 'v4.8.8';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';

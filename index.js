@@ -290,6 +290,12 @@ app.post('/api/register', async (req, res) => {
       console.error('Send welcome message error:', welcomeError);
     }
 
+    try {
+      await addSelfAsFriend(userId);
+    } catch (selfFriendError) {
+      console.error('Add self as friend error:', selfFriendError);
+    }
+
     res.json({ success: true, user: { id: userId, username, avatar: null, nickname: '' } });
   } catch (error) {
     console.error('Register error:', error);
@@ -375,6 +381,35 @@ async function sendWelcomeMessage(userId, username) {
   } catch (error) {
     console.error('Send welcome message error:', error);
   }
+}
+
+async function addSelfAsFriend(userId) {
+  if (DATABASE_URL) {
+    const existFriendship = await friendshipsDB.query(
+      'SELECT id FROM friendships WHERE user_id = $1 AND friend_id = $2',
+      [userId, userId]
+    );
+
+    if (existFriendship.rows.length === 0) {
+      await friendshipsDB.query(
+        'INSERT INTO friendships (user_id, friend_id) VALUES ($1, $2)',
+        [userId, userId]
+      );
+    }
+  } else {
+    const existFriendship = await promisifyDB(friendshipsDB.find).call(friendshipsDB, {
+      user_id: userId,
+      friend_id: userId
+    });
+
+    if (existFriendship.length === 0) {
+      await promisifyDB(friendshipsDB.insert).call(friendshipsDB, {
+        user_id: userId,
+        friend_id: userId
+      });
+    }
+  }
+  console.log(`Self friendship added for user ${userId}`);
 }
 
 app.post('/api/login', async (req, res) => {
