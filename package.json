@@ -1,6 +1,6 @@
 {
     "name": "telll",
-    "version": "5.9.4",
+    "version": "5.9.16",
     "description": "Tell - 即时聊天软件（支持群聊）",
     "main": "index.js",
     "scripts": {
