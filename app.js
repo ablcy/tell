@@ -2244,24 +2244,48 @@ class ChatApp {
             return;
         }
 
-        // 使用字符串数组拼接，比字符串+=快很多
-        const htmlParts = [];
-        let len = 0;
+        // 使用 DocumentFragment 批量 DOM 操作，比 innerHTML 更快
+        const fragment = document.createDocumentFragment();
+        
+        // 缓存元素创建函数
+        const createChatItem = (id, name, isGroup, role, avatar, isSelf) => {
+            const div = document.createElement('div');
+            div.className = isGroup ? 'chat-item group-item' : 'chat-item';
+            div.dataset[isGroup ? 'groupId' : 'friendId'] = id;
+            div.dataset.avatar = avatar || '';
+            div.onclick = isGroup 
+                ? () => this.openGroupChat(id) 
+                : () => this.openChat(id);
+            
+            const avatarInitial = name ? name.charAt(0).toUpperCase() : (isGroup ? 'G' : '?');
+            const avatarBg = isGroup 
+                ? 'linear-gradient(135deg,#667eea,#764ba2)' 
+                : 'var(--talk-blue)';
+            
+            div.innerHTML = `
+                <div class="avatar"><div style="width:100%;height:100%;border-radius:50%;background:${avatarBg};color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;">${avatarInitial}</div></div>
+                <div class="chat-info">
+                    <div class="chat-name">${name}${isGroup && role === 'owner' ? ' (群主)' : ''}${!isGroup && isSelf ? ' (我)' : ''}</div>
+                    <div class="chat-preview">暂无消息</div>
+                </div>
+                <div></div>
+            `;
+            return div;
+        };
 
-        // 先收集所有项（不排序，更快）
         for (let i = 0; i < groupsLen; i++) {
             const g = groups[i];
-            const initial = g.name ? g.name.charAt(0).toUpperCase() : 'G';
-            htmlParts[len++] = `<div class="chat-item group-item" data-group-id="${g.id}" data-avatar="${g.avatar || ''}" onclick="app.openGroupChat('${g.id}')"><div class="avatar"><div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;">${initial}</div></div><div class="chat-info"><div class="chat-name">${g.name}${g.role === 'owner' ? ' (群主)' : ''}</div><div class="chat-preview">暂无消息</div></div><div></div></div>`;
+            fragment.appendChild(createChatItem(g.id, g.name, true, g.role, g.avatar, false));
         }
 
         for (let i = 0; i < friendsLen; i++) {
             const f = friends[i];
-            const initial = f.username ? f.username.charAt(0).toUpperCase() : '?';
-            htmlParts[len++] = `<div class="chat-item" data-friend-id="${f.id}" data-avatar="${f.avatar || ''}" onclick="app.openChat('${f.id}')"><div class="avatar"><div style="width:100%;height:100%;border-radius:50%;background:var(--talk-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;">${initial}</div></div><div class="chat-info"><div class="chat-name">${f.id === userId ? f.username + ' (我)' : f.username}</div><div class="chat-preview">暂无消息</div></div><div></div></div>`;
+            fragment.appendChild(createChatItem(f.id, f.username, false, null, f.avatar, f.id === userId));
         }
 
-        chatList.innerHTML = htmlParts.join('');
+        // 清空并一次性插入
+        chatList.innerHTML = '';
+        chatList.appendChild(fragment);
     }
 
     renderContactsUltraFast() {
@@ -2273,15 +2297,33 @@ class ChatApp {
         const friendsLen = friends.length;
         const userId = this.currentUser?.id;
 
+        const createContactItem = (id, name, isGroup, avatar) => {
+            const div = document.createElement('div');
+            div.className = 'contact-item';
+            div.dataset[isGroup ? 'groupId' : 'friendId'] = id;
+            div.dataset.avatar = avatar || '';
+            
+            const initial = name ? name.charAt(0).toUpperCase() : (isGroup ? '群' : '?');
+            const avatarBg = isGroup 
+                ? 'linear-gradient(135deg,#667eea,#764ba2)' 
+                : 'linear-gradient(135deg,var(--talk-blue),var(--talk-dark-blue))';
+            
+            div.innerHTML = `
+                <div class="avatar" style="background:${avatarBg};">${initial}</div>
+                <span class="contact-name">${name}</span>
+            `;
+            return div;
+        };
+
         if (groupsLen > 0) {
             document.getElementById('contacts-groups-section').style.display = 'block';
-            const htmlParts = [];
+            const fragment = document.createDocumentFragment();
             for (let i = 0; i < groupsLen; i++) {
                 const g = groups[i];
-                const initial = g.name ? g.name.charAt(0).toUpperCase() : '群';
-                htmlParts.push(`<div class="contact-item" data-group-id="${g.id}" data-avatar="${g.avatar || ''}"><div class="avatar" style="background:linear-gradient(135deg,#667eea,#764ba2);">${initial}</div><span class="contact-name">${g.name || g.account}</span></div>`);
+                fragment.appendChild(createContactItem(g.id, g.name || g.account, true, g.avatar));
             }
-            groupList.innerHTML = htmlParts.join('');
+            groupList.innerHTML = '';
+            groupList.appendChild(fragment);
         } else {
             document.getElementById('contacts-groups-section').style.display = 'none';
             groupList.innerHTML = '';
@@ -2289,14 +2331,14 @@ class ChatApp {
 
         if (friendsLen > 0) {
             document.getElementById('contacts-friends-section').style.display = 'block';
-            const htmlParts = [];
+            const fragment = document.createDocumentFragment();
             for (let i = 0; i < friendsLen; i++) {
                 const f = friends[i];
-                const name = f.nickname || f.username;
-                const initial = name.charAt(0).toUpperCase();
-                htmlParts.push(`<div class="contact-item" data-friend-id="${f.id}" data-avatar="${f.avatar || ''}"><div class="avatar" style="background:linear-gradient(135deg,var(--talk-blue),var(--talk-dark-blue));">${initial}</div><span class="contact-name">${name}${f.id === userId ? ' (我)' : ''}</span></div>`);
+                const name = (f.nickname || f.username) + (f.id === userId ? ' (我)' : '');
+                fragment.appendChild(createContactItem(f.id, name, false, f.avatar));
             }
-            friendList.innerHTML = htmlParts.join('');
+            friendList.innerHTML = '';
+            friendList.appendChild(fragment);
         } else {
             document.getElementById('contacts-friends-section').style.display = 'none';
             friendList.innerHTML = '';
@@ -3238,11 +3280,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.13';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.14';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v5.9.13';
+        document.querySelector('.version-info span:first-child').textContent = 'v5.9.14';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
