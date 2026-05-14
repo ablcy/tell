@@ -1048,7 +1048,7 @@ class ChatApp {
         if (!file) return;
 
         try {
-            const base64Data = await this.compressImageToBase64(file, 200, 1200);
+            const base64Data = await this.compressImageToBase64(file);
 
             this.setButtonLoading('send-group-btn', true);
             const sendResult = await this.fetchData('/api/group/message', {
@@ -2791,7 +2791,7 @@ class ChatApp {
         if (!file) return;
 
         try {
-            const base64Data = await this.compressImageToBase64(file, 200, 1200);
+            const base64Data = await this.compressImageToBase64(file);
 
             const sendResult = await this.fetchData('/api/send-message', {
                 method: 'POST',
@@ -2821,7 +2821,7 @@ class ChatApp {
         e.target.value = '';
     }
 
-    async compressImageToBase64(file, maxSizeKB = 200, maxDimension = 1200) {
+    async compressImageToBase64(file, maxSizeKB = 80, maxDimension = 800) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -3238,11 +3238,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.12';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.13';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v5.9.12';
+        document.querySelector('.version-info span:first-child').textContent = 'v5.9.13';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
