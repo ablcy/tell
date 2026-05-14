@@ -1,4 +1,4 @@
-const APP_VERSION = 'v5.9.19';
+const APP_VERSION = 'v5.9.20';
 
 class ChatApp {
     constructor() {
@@ -1647,51 +1647,52 @@ class ChatApp {
         if (result.success) {
             this.currentUser = result.user;
             
-            // 极致优化：使用queueMicrotask延迟写入localStorage，不阻塞主线程
-            queueMicrotask(() => {
+            // 极致优化：使用setTimeout(0)延迟写入localStorage，完全不阻塞主线程
+            setTimeout(() => {
                 try {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
                 } catch (e) {
                     this.cleanupLocalStorage();
                 }
-            });
+            }, 0);
 
             if (result.friends) this.friends = result.friends;
             if (result.groups) this.groups = result.groups;
 
-            // 立即切换界面（关键优化：先显示，再渲染内容）- 最快路径
+            // 立即切换界面（最快路径）- 使用visibility替代display避免重排
             const authScreen = document.getElementById('auth-screen');
             const mainScreen = document.getElementById('main-screen');
-            authScreen.style.display = 'none';
-            mainScreen.style.display = 'flex';
+            authScreen.style.visibility = 'hidden';
+            authScreen.style.position = 'absolute';
+            mainScreen.style.visibility = 'visible';
             
             // 最小化同步操作：只更新用户名，头像用首字母占位
             this.updateProfileSkeleton();
 
-            // 极致优化：使用requestAnimationFrame确保在浏览器空闲时渲染
-            requestAnimationFrame(() => {
+            // 超速优化：使用setTimeout(0)确保立即让出主线程
+            setTimeout(() => {
                 this.renderChatListUltraFast();
-                requestAnimationFrame(() => {
+                setTimeout(() => {
                     this.renderContactsUltraFast();
                     this.setButtonLoading('login-form-submit-btn', false);
                     
                     // 后台懒加载头像（非阻塞）
                     setTimeout(() => {
                         this.lazyLoadAvatars();
-                    }, 50);
-                });
-            });
+                    }, 30);
+                }, 0);
+            }, 0);
 
-            // 延迟加载消息和socket（非关键路径）
+            // 延迟加载消息和socket（非关键路径）- 进一步延迟
             setTimeout(() => {
-                this.loadMessages();
-            }, 300);
+                this.loadMessagesFast();
+            }, 100);
             
             setTimeout(() => {
                 this.startPolling();
                 this.startPasswordVersionCheck();
                 this.loginSocket();
-            }, 800);
+            }, 500);
 
             const endTime = performance.now();
             console.log(`Login completed in ${(endTime - startTime).toFixed(2)}ms`);
@@ -2512,6 +2513,41 @@ class ChatApp {
         }
     }
 
+    async loadMessagesFast() {
+        if (!this.currentUser) return;
+
+        const loadPromises = [];
+        
+        for (const friend of this.friends) {
+            if (this.burnAfterReadingFriendId !== friend.id) {
+                loadPromises.push(
+                    this.fetchData(`/api/messages/${this.currentUser.id}/${friend.id}`)
+                        .then(result => {
+                            if (result.success) {
+                                this.messages[friend.id] = result.messages;
+                            }
+                        })
+                );
+            }
+        }
+
+        for (const group of this.groups) {
+            if (this.burnAfterReadingGroupId !== group.id) {
+                loadPromises.push(
+                    this.fetchData(`/api/group/${group.id}/messages`)
+                        .then(result => {
+                            if (result.success) {
+                                this.groupMessages[group.id] = result.messages;
+                            }
+                        })
+                );
+            }
+        }
+
+        await Promise.all(loadPromises);
+        this.renderChatList();
+    }
+
     async loadMessagesForFriend(friendId) {
         if (!this.currentUser) return;
 
@@ -2579,52 +2615,58 @@ class ChatApp {
         }
 
         const friendMessages = this.messages[this.currentFriend.id] || [];
+        const len = friendMessages.length;
 
-        if (friendMessages.length === 0) {
+        if (len === 0) {
             container.innerHTML = '<div class="empty-chat"><p>开始聊天吧！</p></div>';
             return;
         }
 
-        container.innerHTML = friendMessages.map(msg => {
-            const isMine = msg.senderId === this.currentUser.id;
+        // 更快的字符串拼接方式
+        const currentUserId = this.currentUser.id;
+        const currentFriendAvatar = this.currentFriend.avatar;
+        const currentFriendUsername = this.currentFriend.username;
+        const currentUserAvatar = this.currentUser.avatar;
+        const currentUserUsername = this.currentUser.username;
+        
+        let html = '';
+        
+        for (let i = 0; i < len; i++) {
+            const msg = friendMessages[i];
+            const isMine = msg.senderId === currentUserId;
             const sender = isMine ? this.currentUser : this.currentFriend;
             
             let avatarContent = '';
             if (sender) {
                 if (sender.avatar && sender.avatar.trim() !== '') {
-                    // 有头像时显示图片
-                    avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                        <img src="${sender.avatar}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>`;
+                    avatarContent = `<div style="width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;"><img src="${sender.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>`;
                 } else {
-                    // 没有头像时显示首字母
-                    avatarContent = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--talk-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; flex-shrink: 0;">
-                        ${sender.username.charAt(0).toUpperCase()}
-                    </div>`;
+                    avatarContent = `<div style="width:40px;height:40px;border-radius:50%;background:var(--talk-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0;">${sender.username.charAt(0).toUpperCase()}</div>`;
                 }
             }
 
             let messageContent = '';
             if (msg.type === 'image') {
-                messageContent = `<img src="${msg.content}" alt="" style="max-width: 200px; border-radius: 8px;">`;
+                messageContent = `<img src="${msg.content}" alt="" style="max-width:200px;border-radius:8px;">`;
             } else {
                 messageContent = `<p>${msg.content}</p>`;
             }
 
-            return `
-                <div class="message-item" style="display: flex; flex-direction: ${isMine ? 'row-reverse' : 'row'}; margin-bottom: 12px; padding: 0 12px;">
-                    <div class="avatar-container" style="flex-shrink: 0; margin-top: 4px;">
-                        ${avatarContent}
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: ${isMine ? 'flex-end' : 'flex-start'}; max-width: 70%;">
-                        <div style="background: ${isMine ? 'linear-gradient(135deg, var(--talk-blue), var(--talk-dark-blue))' : 'var(--white)'}; color: ${isMine ? 'white' : 'var(--text-primary)'}; padding: 10px 14px; border-radius: ${isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px'}; box-shadow: var(--shadow-sm);">
-                            ${messageContent}
-                        </div>
-                        <span style="font-size: 11px; color: #999; margin-top: 4px; padding: 0 4px;">${msg.time}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+            const direction = isMine ? 'row-reverse' : 'row';
+            const alignItems = isMine ? 'flex-end' : 'flex-start';
+            const bgColor = isMine ? 'linear-gradient(135deg,var(--talk-blue),var(--talk-dark-blue))' : 'var(--white)';
+            const textColor = isMine ? 'white' : 'var(--text-primary)';
+            const borderRadius = isMine ? '18px 18px 4px 18px' : '18px 18px 18px 4px';
+
+            html += `<div class="message-item" style="display:flex;flex-direction:${direction};margin-bottom:12px;padding:0 12px;">` +
+                `<div class="avatar-container" style="flex-shrink:0;margin-top:4px;">${avatarContent}</div>` +
+                `<div style="display:flex;flex-direction:column;align-items:${alignItems};max-width:70%;">` +
+                `<div style="background:${bgColor};color=${textColor};padding:10px 14px;border-radius:${borderRadius};box-shadow:var(--shadow-sm);">${messageContent}</div>` +
+                `<span style="font-size:11px;color:#999;margin-top:4px;padding:0 4px;">${msg.time}</span>` +
+                `</div></div>`;
+        }
+
+        container.innerHTML = html;
 
         if (scrollToBottom) {
             container.scrollTop = container.scrollHeight;

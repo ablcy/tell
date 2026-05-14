@@ -15,7 +15,7 @@
                 <img src="logo.jpg" alt="Tell Logo" class="password-logo">
                 <h1>Tell Admin</h1>
                 <p>请输入管理员密码</p>
-                <span class="login-version" id="admin-login-version">v5.9.19</span>
+                <span class="login-version" id="admin-login-version">v5.9.20</span>
             </div>
             
             <form id="password-form">
@@ -40,7 +40,7 @@
                 </div>
                 <div class="header-right">
                     <button id="change-pwd-btn" class="btn btn-secondary">修改密码</button>
-                    <span class="version-badge" id="admin-header-version">v5.9.19</span>
+                    <span class="version-badge" id="admin-header-version">v5.9.20</span>
                     <a href="/" class="back-link">← 返回应用</a>
                 </div>
             </div>
@@ -149,17 +149,18 @@
                 <div class="logs-container" id="logs-container">
                     <div class="log-entry">
                         <span class="log-time">[系统]</span>
-                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.19 启动成功</span>
+                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.20 启动成功</span>
                     </div>
                 </div>
             </section>
 
             <section class="changelog-section">
                 <div class="section-header changelog-header">
-                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.19 20260515</h2>
+                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.20 20260515</h2>
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.20 20260515: 极致优化登录速度、消息界面加载速度和历史记录显示速度；使用Promise.all并行加载消息；优化字符串拼接方式；使用visibility替代display切换界面避免重排</div>
                     <div class="update-item">✨ v5.9.19 20260515: 修复消息滚动问题，只在刚进入聊天或发送新消息时滚动到底部，用户查看历史消息时不自动滚动</div>
                     <div class="update-item">✨ v5.9.18 20260515: 修复消息界面最后一个联系人被底部导航栏遮挡问题（仅消息界面，通讯录界面保持原样）</div>
                     <div class="update-item">✨ v5.9.17 20260515: 极致优化登录速度，目标1秒内进入主页；压缩登录界面logo图片；使用preload预加载关键资源；优化首屏渲染流程</div>
