@@ -1047,23 +1047,16 @@ class ChatApp {
         const file = e.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('image', file);
+        try {
+            const base64Data = await this.compressImageToBase64(file, 200, 1200);
 
-        const result = await this.fetchData('/api/upload-image', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (result.success) {
-            // 发送图片消息
             this.setButtonLoading('send-group-btn', true);
             const sendResult = await this.fetchData('/api/group/message', {
                 method: 'POST',
                 body: JSON.stringify({
                     groupId: this.currentGroup.id,
                     senderId: this.currentUser.id,
-                    content: result.url,
+                    content: base64Data,
                     type: 'image'
                 })
             });
@@ -1075,9 +1068,12 @@ class ChatApp {
                 }
                 this.groupMessages[this.currentGroup.id].push(sendResult.message);
                 this.renderGroupMessages();
+            } else {
+                alert(sendResult.message || '发送图片失败');
             }
-        } else {
-            alert(result.message || '上传图片失败');
+        } catch (error) {
+            console.error('发送图片错误:', error);
+            alert('发送失败');
         }
 
         // 清空文件输入
@@ -2794,47 +2790,77 @@ class ChatApp {
         const file = e.target.files[0];
         if (!file) return;
 
-        const compressedFile = await this.compressImageFile(file, 200, 1200);
-
-        const formData = new FormData();
-        formData.append('image', compressedFile);
-
         try {
-            const response = await fetch(`${this.baseUrl}/api/upload-image`, {
+            const base64Data = await this.compressImageToBase64(file, 200, 1200);
+
+            const sendResult = await this.fetchData('/api/send-message', {
                 method: 'POST',
-                body: formData
+                body: JSON.stringify({
+                    senderId: this.currentUser.id,
+                    receiverId: this.currentFriend.id,
+                    content: base64Data,
+                    type: 'image'
+                })
             });
-            const result = await response.json();
 
-            if (result.success) {
-                // 发送图片消息
-                const sendResult = await this.fetchData('/api/send-message', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        senderId: this.currentUser.id,
-                        receiverId: this.currentFriend.id,
-                        content: result.url,
-                        type: 'image'
-                    })
-                });
-
-                if (sendResult.success) {
-                    if (!this.messages[this.currentFriend.id]) {
-                        this.messages[this.currentFriend.id] = [];
-                    }
-                    this.messages[this.currentFriend.id].push(sendResult.message);
-                    this.renderMessages();
-                    this.renderChatList();
+            if (sendResult.success) {
+                if (!this.messages[this.currentFriend.id]) {
+                    this.messages[this.currentFriend.id] = [];
                 }
+                this.messages[this.currentFriend.id].push(sendResult.message);
+                this.renderMessages();
+                this.renderChatList();
             } else {
-                alert('上传失败: ' + (result.message || '未知错误'));
+                alert('发送失败: ' + (sendResult.message || '未知错误'));
             }
         } catch (error) {
-            console.error('上传图片错误:', error);
-            alert('上传失败');
+            console.error('发送图片错误:', error);
+            alert('发送失败');
         }
 
         e.target.value = '';
+    }
+
+    async compressImageToBase64(file, maxSizeKB = 200, maxDimension = 1200) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let { width, height } = img;
+                    const originalSizeKB = file.size / 1024;
+
+                    if (originalSizeKB <= maxSizeKB && width <= maxDimension && height <= maxDimension) {
+                        resolve(e.target.result);
+                        return;
+                    }
+
+                    const ratio = Math.min(maxDimension / width, maxDimension / height, 1);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    let quality = 0.9;
+                    let result = canvas.toDataURL('image/jpeg', quality);
+
+                    while (result.length * 0.75 / 1024 > maxSizeKB && quality > 0.3) {
+                        quality -= 0.1;
+                        result = canvas.toDataURL('image/jpeg', quality);
+                    }
+
+                    resolve(result);
+                };
+                img.onerror = () => reject(new Error('图片加载失败'));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(new Error('文件读取失败'));
+            reader.readAsDataURL(file);
+        });
     }
 
     // 修改密码
@@ -3212,11 +3238,11 @@ class ChatApp {
         }
 
         // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.11';
+        document.querySelector('.footer-info p:first-child').textContent = 'Tell v5.9.12';
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v5.9.11';
+        document.querySelector('.version-info span:first-child').textContent = 'v5.9.12';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
