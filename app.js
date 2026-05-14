@@ -1462,6 +1462,20 @@ class ChatApp {
 
         // 语言切换
         document.getElementById('lang-toggle').addEventListener('change', (e) => this.toggleLanguage(e.target.checked));
+
+        // 联系人列表事件委托
+        document.getElementById('contacts-groups-section')?.addEventListener('click', (e) => {
+            const item = e.target.closest('.contact-item[data-group-id]');
+            if (item) {
+                this.openGroupChat(item.dataset.groupId);
+            }
+        });
+        document.getElementById('contacts-friends-section')?.addEventListener('click', (e) => {
+            const item = e.target.closest('.contact-item[data-friend-id]');
+            if (item) {
+                this.openChat(item.dataset.friendId);
+            }
+        });
     }
 
     startUptimeTimer() {
@@ -1787,7 +1801,7 @@ class ChatApp {
 
         if (this.groups.length > 0) {
             groupsSection.style.display = 'block';
-            groupList.innerHTML = this.groups.map(group => `
+            const groupHtml = this.groups.map(group => `
                 <div class="contact-item" data-group-id="${group.id}">
                     <div class="avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
                         ${group.avatar ? `<img src="${group.avatar}" alt="">` : '群'}
@@ -1795,20 +1809,15 @@ class ChatApp {
                     <span class="contact-name">${group.name || group.account}</span>
                 </div>
             `).join('');
-
-            groupList.querySelectorAll('.contact-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const groupId = item.dataset.groupId;
-                    this.openGroupChat(groupId);
-                });
-            });
+            groupList.innerHTML = groupHtml;
         } else {
             groupsSection.style.display = 'none';
+            groupList.innerHTML = '';
         }
 
         if (this.friends.length > 0) {
             friendsSection.style.display = 'block';
-            friendList.innerHTML = this.friends.map(friend => `
+            const friendHtml = this.friends.map(friend => `
                 <div class="contact-item" data-friend-id="${friend.id}">
                     <div class="avatar" style="background: linear-gradient(135deg, var(--talk-blue), var(--talk-dark-blue));">
                         ${friend.avatar ? `<img src="${friend.avatar}" alt="">` : (friend.nickname || friend.username).charAt(0).toUpperCase()}
@@ -1816,15 +1825,10 @@ class ChatApp {
                     <span class="contact-name">${friend.nickname || friend.username}${friend.id === this.currentUser?.id ? ' (我)' : ''}</span>
                 </div>
             `).join('');
-
-            friendList.querySelectorAll('.contact-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const friendId = item.dataset.friendId;
-                    this.openChat(friendId);
-                });
-            });
+            friendList.innerHTML = friendHtml;
         } else {
             friendsSection.style.display = 'none';
+            friendList.innerHTML = '';
         }
     }
 
@@ -2784,7 +2788,7 @@ class ChatApp {
         document.querySelector('.copyright').textContent = t.copyright;
 
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = 'v5.9.4';
+        document.querySelector('.version-info span:first-child').textContent = 'v5.9.6';
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
