@@ -1,0 +1,45 @@
+{
+  "name": "Tell· 听耳",
+  "short_name": "Tell",
+  "description": "一款支持视频通话和阅后即焚的私密聊天应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["social", "communication"],
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "发起聊天",
+      "short_name": "聊天",
+      "description": "快速开始新的聊天",
+      "url": "/#chats",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "通讯录",
+      "short_name": "通讯录",
+      "description": "查看我的好友列表",
+      "url": "/#contacts",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

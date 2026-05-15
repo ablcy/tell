@@ -1,5 +1,38 @@
 const APP_VERSION = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.23';
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('[App] Service Worker registered:', registration.scope);
+
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            if (confirm('发现新版本，是否立即更新？')) {
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                window.location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+            const version = await navigator.serviceWorker.ready.then(r => r.active?.scriptURL || 'unknown');
+            console.log('[App] Service Worker version:', version);
+        } catch (error) {
+            console.log('[App] Service Worker registration failed:', error);
+        }
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[App] Service Worker controller changed');
+        window.location.reload();
+    });
+}
+
 class ChatApp {
     constructor() {
         this.currentUser = null;
