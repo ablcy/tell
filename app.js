@@ -2150,8 +2150,8 @@ class ChatApp {
             return;
         }
 
-        if (newUsername.length < 3) {
-            document.getElementById('change-username-error').textContent = '账号至少需要3个字符';
+        if (newUsername.length < 1) {
+            document.getElementById('change-username-error').textContent = '账号长度不能少于1个字符';
             return;
         }
 
