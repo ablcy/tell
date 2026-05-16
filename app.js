@@ -35,6 +35,7 @@ if ('serviceWorker' in navigator) {
 
 class ChatApp {
     constructor() {
+        this.AI_AGENT_USERNAME = 'AI助手';
         this.currentUser = null;
         this.currentFriend = null;
         this.messages = {};
@@ -197,6 +198,11 @@ class ChatApp {
         // 监听通话拒绝
         this.socket.on('call-reject', (data) => {
             this.handleCallReject(data);
+        });
+
+        // 监听新消息
+        this.socket.on('new-message', (data) => {
+            this.handleNewMessage(data);
         });
     }
     
@@ -547,10 +553,33 @@ class ChatApp {
         pc.onsignalingstatechange = () => {
             console.log('Signaling state:', pc.signalingState);
         };
-        
+
         return pc;
     }
-    
+
+    handleNewMessage(data) {
+        if (data.sender_username === this.AI_AGENT_USERNAME) {
+            const aiFriend = this.friends.find(f => f.username === this.AI_AGENT_USERNAME);
+            if (aiFriend && this.currentFriend?.id === aiFriend.id) {
+                this.appendMessage({
+                    id: data.id,
+                    sender_id: data.sender_id,
+                    content: data.content,
+                    type: data.type || 'text',
+                    time: data.time,
+                    timestamp: data.timestamp,
+                    sender_username: data.sender_username
+                });
+                this.scrollToBottom();
+            }
+
+            if (this.currentUser && this.isNotificationEnabled(aiFriend?.id, false)) {
+                this.playNotificationSound('message');
+                this.showToast(`AI助手: ${data.content.substring(0, 50)}`);
+            }
+        }
+    }
+
     handleIncomingCall(data) {
         if (this.isInCall) {
             this.socket.emit('call-reject', { targetId: data.from });

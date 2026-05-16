@@ -545,6 +545,20 @@ async function handleAIMessage(userId, userContent) {
         read: false
       });
     }
+
+    const targetSocketId = onlineUsers.get(userId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('new-message', {
+        id: messageId,
+        sender_id: AI_AGENT_ID,
+        sender_username: AI_AGENT_USERNAME,
+        receiver_id: userId,
+        content: aiResponse,
+        type: 'text',
+        time: formattedTime,
+        timestamp: Date.now()
+      });
+    }
   } catch (error) {
     console.error('Handle AI message error:', error);
   }
