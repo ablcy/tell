@@ -58,7 +58,8 @@ class AdminPanel {
         this.loadStats();
         this.loadUsers();
         this.loadGroups();
-        this.addLog('Tell Admin v5.1.0 启动成功', '系统');
+        const version = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.35';
+        this.addLog(`Tell Admin ${version} 启动成功`, '系统');
     }
 
     bindEvents() {

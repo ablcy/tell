@@ -15,7 +15,7 @@
                 <img src="logo.jpg" alt="Tell Logo" class="password-logo">
                 <h1>Tell Admin</h1>
                 <p>请输入管理员密码</p>
-                <span class="login-version" id="admin-login-version">v5.9.23</span>
+                <span class="login-version" id="admin-login-version">v5.9.35</span>
             </div>
             
             <form id="password-form">
@@ -40,7 +40,7 @@
                 </div>
                 <div class="header-right">
                     <button id="change-pwd-btn" class="btn btn-secondary">修改密码</button>
-                    <span class="version-badge" id="admin-header-version">v5.9.23</span>
+                    <span class="version-badge" id="admin-header-version">v5.9.35</span>
                     <a href="/" class="back-link">← 返回应用</a>
                 </div>
             </div>
@@ -149,17 +149,24 @@
                 <div class="logs-container" id="logs-container">
                     <div class="log-entry">
                         <span class="log-time">[系统]</span>
-                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.23 启动成功</span>
+                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.35 启动成功</span>
                     </div>
                 </div>
             </section>
 
             <section class="changelog-section">
                 <div class="section-header changelog-header">
-                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.23 20260515</h2>
+                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.35 202605151533</h2>
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.35 202605151533: 修复版本号显示问题，更新所有硬编码版本号至v5.9.35，确保前端、后台管理、更新日志等所有位置版本号同步</div>
+                    <div class="update-item">✨ v5.9.34 202605170730: 修复所有消息的实时推送和自动滚动问题，后端发送消息后通过Socket.IO实时推送消息给接收者，前端统一处理所有消息的实时接收和显示，无论是AI还是好友发消息，都能即时显示并自动滚动到底部，添加消息去重逻辑避免重复显示消息</div>
+                    <div class="update-item">✨ v5.9.33 202605170630: 修复AI消息实时推送的判断逻辑问题，通过用户名判断是否是发送给AI助手的消息，修复AI_AGENT_ID未初始化导致的消息处理失败问题</div>
+                    <div class="update-item">✨ v5.9.32 202605170530: 修复AI消息自动滚动到底部问题，确保收到消息时聊天框自动滚动</div>
+                    <div class="update-item">✨ v5.9.31 202605170500: 修复AI助手消息实时推送问题，回复现在能即时显示在聊天界面</div>
+                    <div class="update-item">✨ v5.9.30 202605170130: 新增AI智能助手功能，AI助手自动成为所有用户的好友，新用户注册后自动添加AI助手为好友，AI助手会主动发送欢迎消息，接入智谱AI API（glm-4-flash模型），支持智能对话回复，管理员可配置AI API Key</div>
+                    <div class="update-item">✨ v5.9.29 202605170045: 更新PWA应用图标为tell1.png，将顶部状态栏背景色改为白色</div>
                     <div class="update-item">✨ v5.9.23 20260515: 实现版本号统一管理机制，创建version.js集中管理前端和后端版本号，修改一处即可同步所有文件版本号显示</div>
                     <div class="update-item">✨ v5.9.22 20260515: 修复好友聊天消息蓝底黑字问题，将消息内容&lt;p&gt;标签改为&lt;span style="color:xxx"&gt;确保文字颜色正确显示</div>
                     <div class="update-item">✨ v5.9.21 20260515: 修复服务器崩溃问题，升级nedb到@seald-io/nedb；修复promisifyDB函数参数传递问题；恢复稳定的登录流程；优化登录速度和历史消息加载速度</div>
