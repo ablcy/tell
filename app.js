@@ -1,4 +1,4 @@
-const APP_VERSION = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.23';
+const APP_VERSION = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.35';
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
