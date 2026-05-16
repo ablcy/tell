@@ -561,16 +561,19 @@ class ChatApp {
         if (data.sender_username === this.AI_AGENT_USERNAME) {
             const aiFriend = this.friends.find(f => f.username === this.AI_AGENT_USERNAME);
             if (aiFriend && this.currentFriend?.id === aiFriend.id) {
-                this.appendMessage({
+                if (!this.messages[aiFriend.id]) {
+                    this.messages[aiFriend.id] = [];
+                }
+                this.messages[aiFriend.id].push({
                     id: data.id,
                     sender_id: data.sender_id,
+                    senderId: data.sender_id,
                     content: data.content,
                     type: data.type || 'text',
                     time: data.time,
-                    timestamp: data.timestamp,
-                    sender_username: data.sender_username
+                    timestamp: data.timestamp
                 });
-                this.scrollToBottom();
+                this.renderMessages(true);
             }
 
             if (this.currentUser && this.isNotificationEnabled(aiFriend?.id, false)) {
