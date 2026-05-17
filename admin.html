@@ -15,7 +15,7 @@
                 <img src="logo.jpg" alt="Tell Logo" class="password-logo">
                 <h1>Tell Admin</h1>
                 <p>请输入管理员密码</p>
-                <span class="login-version" id="admin-login-version">v5.9.42</span>
+                <span class="login-version" id="admin-login-version">v5.9.43</span>
             </div>
             
             <form id="password-form">
@@ -40,7 +40,7 @@
                 </div>
                 <div class="header-right">
                     <button id="change-pwd-btn" class="btn btn-secondary">修改密码</button>
-                    <span class="version-badge" id="admin-header-version">v5.9.42</span>
+                    <span class="version-badge" id="admin-header-version">v5.9.43</span>
                     <a href="/" class="back-link">← 返回应用</a>
                 </div>
             </div>
@@ -149,17 +149,18 @@
                 <div class="logs-container" id="logs-container">
                     <div class="log-entry">
                         <span class="log-time">[系统]</span>
-                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.42 启动成功</span>
+                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.43 启动成功</span>
                     </div>
                 </div>
             </section>
 
             <section class="changelog-section">
                 <div class="section-header changelog-header">
-                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.42 202605171401</h2>
+                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.43 202605171401</h2>
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.43 202605171401: 修复消息提示音重复播放的问题，移除 loadMessages 中的提示音播放，只保留 handleNewMessage 中的提示音播放</div>
                     <div class="update-item">✨ v5.9.42 202605171401: 修复 acceptCall 中创建新的 AudioContext 导致的冲突问题，改用复用 callAudioContext</div>
                     <div class="update-item">✨ v5.9.41 202605171709: 修复接听电话后铃声还在响的问题（在acceptCall方法中添加stopCallRingtone）；修复重新加载PWA时历史消息触发提示音的问题（添加messagesLoaded标志位）</div>
                     <div class="update-item">✨ v5.9.40 202605171401: 修复接听电话后铃声还在响的问题；修复对方挂断电话后拨打方没有退出视频框并提醒的问题；更新所有硬编码版本号至v5.9.40</div>

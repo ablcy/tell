@@ -1,4 +1,4 @@
-const APP_VERSION = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.42';
+const APP_VERSION = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.43';
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
@@ -2681,14 +2681,6 @@ class ChatApp {
                 const oldCount = (this.messages[friend.id] || []).length;
                 this.messages[friend.id] = result.messages;
                 const newCount = result.messages.length;
-                if (newCount > oldCount && this.isNotificationEnabled(friend.id, false) && this.messagesLoaded) {
-                    const newMsgs = result.messages.slice(oldCount);
-                    const hasNewFromOther = newMsgs.some(m => m.senderId !== this.currentUser.id);
-                    if (hasNewFromOther) {
-                        this.playNotificationSound('message');
-                        break;
-                    }
-                }
             }
         }
         
@@ -2705,14 +2697,6 @@ class ChatApp {
                 const oldCount = (this.groupMessages[group.id] || []).length;
                 this.groupMessages[group.id] = result.messages;
                 const newCount = result.messages.length;
-                if (newCount > oldCount && this.isNotificationEnabled(group.id, true) && this.messagesLoaded) {
-                    const newMsgs = result.messages.slice(oldCount);
-                    const hasNewFromOther = newMsgs.some(m => m.senderId !== this.currentUser.id);
-                    if (hasNewFromOther) {
-                        this.playNotificationSound('message');
-                        break;
-                    }
-                }
             }
         }
 

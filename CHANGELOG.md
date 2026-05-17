@@ -1,5 +1,9 @@
 # 更新日志
 
+## ✨ v5.9.43 202605171401
+
+- 修复消息提示音重复播放的问题，移除 loadMessages 中的提示音播放，只保留 handleNewMessage 中的提示音播放
+
 ## ✨ v5.9.42 202605171401
 
 - 修复 acceptCall 中创建新的 AudioContext 导致的冲突问题，改用复用 callAudioContext
