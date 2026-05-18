@@ -1051,6 +1051,18 @@ app.post('/api/add-friend', async (req, res) => {
       return res.status(400).json({ success: false, message: '已经是好友' });
     }
 
+    // 获取添加者（用户A）的信息，用于通知被添加者（用户B）
+    let adderData;
+    if (DATABASE_URL) {
+      const adderResult = await usersDB.query(
+        'SELECT id, username, avatar, nickname FROM users WHERE id = $1',
+        [userId]
+      );
+      adderData = adderResult.rows[0];
+    } else {
+      adderData = await promisifyDB(usersDB.findOne).call(usersDB, { id: userId });
+    }
+
     if (DATABASE_URL) {
       await friendshipsDB.query(
         'INSERT INTO friendships (user_id, friend_id) VALUES ($1, $2), ($3, $4)',
@@ -1067,14 +1079,14 @@ app.post('/api/add-friend', async (req, res) => {
       });
     }
 
-    // 通过Socket通知被添加的一方
+    // 通过Socket通知被添加的一方，发送添加者（用户A）的信息
     const targetSocketId = onlineUsers.get(friendData.id);
-    if (targetSocketId) {
+    if (targetSocketId && adderData) {
       io.to(targetSocketId).emit('friend-added', {
-        friendId: userId,
-        friendUsername: friendData.username,
-        friendAvatar: friendData.avatar,
-        friendNickname: friendData.nickname
+        friendId: adderData.id,
+        friendUsername: adderData.username,
+        friendAvatar: adderData.avatar,
+        friendNickname: adderData.nickname
       });
     }
 
