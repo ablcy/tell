@@ -1067,6 +1067,17 @@ app.post('/api/add-friend', async (req, res) => {
       });
     }
 
+    // 通过Socket通知被添加的一方
+    const targetSocketId = onlineUsers.get(friendData.id);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('friend-added', {
+        friendId: userId,
+        friendUsername: friendData.username,
+        friendAvatar: friendData.avatar,
+        friendNickname: friendData.nickname
+      });
+    }
+
     res.json({ success: true, friend: friendData });
   } catch (error) {
     console.error('Add friend error:', error);

@@ -237,6 +237,11 @@ class ChatApp {
         this.socket.on('new-message', (data) => {
             this.handleNewMessage(data);
         });
+
+        // 监听被添加好友通知
+        this.socket.on('friend-added', (data) => {
+            this.handleFriendAdded(data);
+        });
     }
     
     loginSocket() {
@@ -1220,6 +1225,28 @@ class ChatApp {
     toggleGroupNotification(e) {
         if (!this.currentGroup) return;
         this.setNotificationEnabled(this.currentGroup.id, e.target.checked, true);
+    }
+
+    handleFriendAdded(data) {
+        const newFriend = {
+            id: data.friendId,
+            username: data.friendUsername,
+            avatar: data.friendAvatar,
+            nickname: data.friendNickname || ''
+        };
+
+        const exists = this.friends.some(f => f.id === newFriend.id);
+        if (!exists) {
+            this.friends.push(newFriend);
+            this.messages[newFriend.id] = [];
+            this.renderChatList();
+            this.renderContacts();
+        }
+
+        if (this.isGlobalMessageNotificationEnabled()) {
+            this.playNotificationSound('message');
+        }
+        this.showToast(`${newFriend.username} 已添加你为好友`);
     }
 
     renderGroupMessages(scrollToBottom = false) {
