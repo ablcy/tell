@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tell-v5.9.57';
+const CACHE_NAME = 'tell-v5.9.58';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

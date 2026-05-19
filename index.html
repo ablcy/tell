@@ -44,10 +44,11 @@
                     <input type="password" id="login-password" placeholder="密码" required>
                     <button type="submit" id="login-form-submit-btn">登录</button>
                     <p class="error-message" id="login-error"></p>
+                    <p class="auth-link">还没有账号？<span id="go-to-register" style="color: #4a90d9; cursor: pointer;">立即注册</span></p>
                 </form>
 
                 <form id="register-form" style="display: none;">
-                    <input type="text" id="register-username" placeholder="账号" required>
+                    <input type="text" id="register-username" placeholder="账号（支持中文/英文/符号，至少2字符）" required>
                     <input type="password" id="register-password" placeholder="密码" required>
                     <input type="password" id="register-password-confirm" placeholder="确认密码" required>
                     <button type="submit" id="register-form-submit-btn">注册</button>
@@ -69,6 +70,13 @@
                         if (deployMeta) {
                             deployMeta.content = fullVersion;
                         }
+                        
+                        document.getElementById('go-to-register').addEventListener('click', function() {
+                            document.getElementById('login-tab').classList.remove('active');
+                            document.getElementById('register-tab').classList.add('active');
+                            document.getElementById('login-form').style.display = 'none';
+                            document.getElementById('register-form').style.display = 'block';
+                        });
                     });
                 </script>
             </div>
