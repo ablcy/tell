@@ -58,7 +58,18 @@ class AdminPanel {
         this.loadStats();
         this.loadUsers();
         this.loadGroups();
-        const version = typeof VERSION !== 'undefined' ? VERSION.full() : 'v5.9.46';
+        this.initVersionDisplay();
+    }
+
+    initVersionDisplay() {
+        const version = typeof VERSION !== 'undefined' ? VERSION.full() : 'unknown';
+        const fullVersion = typeof VERSION !== 'undefined' ? VERSION.fullWithBuild() : 'unknown';
+        
+        document.getElementById('admin-login-version').textContent = version;
+        document.getElementById('admin-header-version').textContent = version;
+        document.getElementById('admin-log-version').textContent = version;
+        document.getElementById('changelog-version').textContent = fullVersion;
+        
         this.addLog(`Tell Admin ${version} 启动成功`, '系统');
     }
 

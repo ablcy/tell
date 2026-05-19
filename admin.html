@@ -15,7 +15,7 @@
                 <img src="logo.jpg" alt="Tell Logo" class="password-logo">
                 <h1>Tell Admin</h1>
                 <p>请输入管理员密码</p>
-                <span class="login-version" id="admin-login-version">v5.9.46</span>
+                <span class="login-version" id="admin-login-version"></span>
             </div>
             
             <form id="password-form">
@@ -40,7 +40,7 @@
                 </div>
                 <div class="header-right">
                     <button id="change-pwd-btn" class="btn btn-secondary">修改密码</button>
-                    <span class="version-badge" id="admin-header-version">v5.9.46</span>
+                    <span class="version-badge" id="admin-header-version"></span>
                     <a href="/" class="back-link">← 返回应用</a>
                 </div>
             </div>
@@ -149,17 +149,22 @@
                 <div class="logs-container" id="logs-container">
                     <div class="log-entry">
                         <span class="log-time">[系统]</span>
-                        <span class="log-message" id="admin-log-message">Tell Admin v5.9.46 启动成功</span>
+                        <span class="log-message" id="admin-log-message">Tell Admin <span id="admin-log-version"></span> 启动成功</span>
                     </div>
                 </div>
             </section>
 
             <section class="changelog-section">
                 <div class="section-header changelog-header">
-                    <h2 id="admin-changelog-header">📝 更新日志 v5.9.46 202605171800</h2>
+                    <h2 id="admin-changelog-header">📝 更新日志 <span id="changelog-version"></span></h2>
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.51 202605191100: 移除所有硬编码版本号，统一从 version.js 动态读取；改进 Service Worker 缓存清理策略，修复刷新时版本号跳跃问题；版本号显示更稳定、更一致</div>
+                    <div class="update-item">✨ v5.9.50 202605181931: 修复好友添加通知头像显示错误问题，确保用户B添加用户A时，用户A正确显示用户B的头像和账号</div>
+                    <div class="update-item">✨ v5.9.49 202605172330: 修复添加好友后消息无法实时收到问题，添加Socket.IO实时通知</div>
+                    <div class="update-item">✨ v5.9.48 20260517: 修复密码修改弹窗问题，移除密码已被修改弹窗，管理员修改密码后强制用户退出登录</div>
+                    <div class="update-item">✨ v5.9.47 20260516: 通知设置新增悬浮通知和锁屏通知选项，默认开启</div>
                     <div class="update-item">✨ v5.9.46 202605171800: 添加 Maskable Icon 支持，优化 Android 图标显示效果</div>
                     <div class="update-item">✨ v5.9.45 202605171700: 未读消息数改为圆形样式；修复从会话界面退出后未读消息数未消掉的问题，正在聊天时收到的新消息自动标记为已读</div>
                     <div class="update-item">✨ v5.9.44 202605171600: 修复好友设置关闭消息提醒后仍有提示音的问题；在个人界面新增通知设置菜单，控制全局的消息通知和视频通话通知，默认均开启</div>

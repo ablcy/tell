@@ -3670,12 +3670,17 @@ class ChatApp {
             emptyChat.textContent = t.startChat;
         }
 
-        // 页脚
-        document.querySelector('.footer-info p:first-child').textContent = 'Tell ' + APP_VERSION;
-        document.querySelector('.copyright').textContent = t.copyright;
-
         // 版本信息
-        document.querySelector('.version-info span:first-child').textContent = APP_VERSION;
+        const version = typeof VERSION !== 'undefined' ? VERSION.full() : 'unknown';
+        const fullVersion = typeof VERSION !== 'undefined' ? VERSION.fullWithBuild() : 'unknown';
+        
+        document.getElementById('login-version').textContent = version;
+        document.getElementById('footer-version-number').textContent = version;
+        
+        const deployMeta = document.querySelector('meta[name="deploy-trigger"]');
+        if (deployMeta) {
+            deployMeta.content = fullVersion;
+        }
 
         // 聊天输入框
         document.getElementById('message-input').placeholder = this.currentLang === 'zh' ? '输入消息...' : 'Type a message...';
