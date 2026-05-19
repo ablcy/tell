@@ -524,7 +524,13 @@ async function sendOfficialWelcomeMessage(userId) {
   try {
     const messageId = uuidv4();
     const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    const year = beijingTime.getUTCFullYear();
+    const month = String(beijingTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(beijingTime.getUTCDate()).padStart(2, '0');
+    const hours = String(beijingTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(beijingTime.getUTCMinutes()).padStart(2, '0');
+    const timeStr = `${year}/${month}/${day} ${hours}:${minutes}`;
 
     if (DATABASE_URL) {
       await messagesDB.query(
@@ -1621,7 +1627,13 @@ app.post('/api/admin/official/broadcast', async (req, res) => {
         try {
           const messageId = uuidv4();
           const now = new Date();
-          const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+          const year = beijingTime.getUTCFullYear();
+          const month = String(beijingTime.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(beijingTime.getUTCDate()).padStart(2, '0');
+          const hours = String(beijingTime.getUTCHours()).padStart(2, '0');
+          const minutes = String(beijingTime.getUTCMinutes()).padStart(2, '0');
+          const timeStr = `${year}/${month}/${day} ${hours}:${minutes}`;
 
           if (DATABASE_URL) {
             await messagesDB.query(
