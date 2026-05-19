@@ -36,7 +36,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 40px;
+    padding-top: 10px;
     padding-bottom: 20px;
     box-sizing: border-box;
     background: var(--bg-color);
@@ -51,7 +51,7 @@ body {
 
 .auth-container {
     background: var(--white);
-    padding: 50px 20px;
+    padding: 20px 20px;
     border-radius: 0;
     width: 100%;
     max-width: none;
@@ -64,7 +64,7 @@ body {
 
 .auth-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
 .app-logo {
@@ -92,7 +92,7 @@ body {
 .auth-tabs {
     display: flex;
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .auth-tabs button {
@@ -200,7 +200,7 @@ form button[type="submit"]:hover {
 }
 
 .version-info {
-    margin-top: 30px;
+    margin-top: 10px;
     text-align: center;
     font-size: 0.8rem;
     color: var(--text-secondary);
