@@ -3593,7 +3593,7 @@ class ChatApp {
         document.getElementById('login-tab').textContent = t.login;
         document.getElementById('register-tab').textContent = t.register;
 
-        document.querySelector('#register-form input[type="text"]').placeholder = t.username + ' (3+ chars)';
+        document.querySelector('#register-form input[type="text"]').placeholder = '账号（支持中文/英文/符号，至少2字符）';
         document.querySelectorAll('#register-form input[type="password"]')[0].placeholder = t.password;
         document.querySelectorAll('#register-form input[type="password"]')[1].placeholder = t.password;
         document.getElementById('register-form-submit-btn').textContent = t.register;
