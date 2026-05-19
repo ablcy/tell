@@ -354,6 +354,11 @@ const AI_AGENT_USERNAME = 'AI';
 const AI_AGENT_NICKNAME = 'AI智能助手';
 let AI_API_KEY = process.env.AI_API_KEY || 'de2da1e5f1f24c54b645051fbe551e32.OdKI3urA59V4evNo';
 
+let OFFICIAL_ACCOUNT_ID = null;
+const OFFICIAL_ACCOUNT_USERNAME = 'Tell';
+const OFFICIAL_ACCOUNT_NICKNAME = 'Tell官方';
+const DEFAULT_WELCOME_MESSAGE = '欢迎来到Tell，我是Tell官方，应用介绍及公告在发现界面，有建议和反馈可直接给我发消息，或者加入官方QQ群738894372，祝你生活愉快~';
+
 async function initAIAgent() {
   try {
     let aiUser;
@@ -394,8 +399,163 @@ async function initAIAgent() {
     }
 
     await addAIAgentToAllUsers();
+    await initOfficialAccount();
   } catch (error) {
     console.error('Init AI Agent error:', error);
+  }
+}
+
+async function initOfficialAccount() {
+  try {
+    let officialUser;
+    if (DATABASE_URL) {
+      officialUser = await usersDB.query('SELECT id FROM users WHERE username = $1', [OFFICIAL_ACCOUNT_USERNAME]);
+    } else {
+      officialUser = await promisifyDB(usersDB.find).call(usersDB, { username: OFFICIAL_ACCOUNT_USERNAME });
+    }
+
+    const officialUserData = DATABASE_URL ? officialUser.rows[0] : officialUser[0];
+
+    if (!officialUserData) {
+      const hashedPassword = await bcrypt.hash('official123', SALT_ROUNDS);
+      const officialId = uuidv4();
+
+      if (DATABASE_URL) {
+        await usersDB.query(
+          'INSERT INTO users (id, username, password, avatar, nickname) VALUES ($1, $2, $3, $4, $5)',
+          [officialId, OFFICIAL_ACCOUNT_USERNAME, hashedPassword, null, OFFICIAL_ACCOUNT_NICKNAME]
+        );
+      } else {
+        await promisifyDB(usersDB.insert).call(usersDB, {
+          _id: officialId,
+          id: officialId,
+          username: OFFICIAL_ACCOUNT_USERNAME,
+          password: hashedPassword,
+          avatar: null,
+          nickname: OFFICIAL_ACCOUNT_NICKNAME,
+          created_at: new Date().toISOString()
+        });
+      }
+
+      OFFICIAL_ACCOUNT_ID = officialId;
+      console.log('Official Account created successfully');
+    } else {
+      OFFICIAL_ACCOUNT_ID = officialUserData.id;
+      console.log('Official Account loaded');
+    }
+
+    await addOfficialAccountToAllUsers();
+  } catch (error) {
+    console.error('Init Official Account error:', error);
+  }
+}
+
+async function addOfficialAccountToAllUsers() {
+  if (!OFFICIAL_ACCOUNT_ID) return;
+
+  try {
+    let allUsers;
+    if (DATABASE_URL) {
+      allUsers = await usersDB.query('SELECT id, username FROM users WHERE id != $1', [OFFICIAL_ACCOUNT_ID]);
+      allUsers = allUsers.rows;
+    } else {
+      allUsers = await promisifyDB(usersDB.find).call(usersDB, { id: { $ne: OFFICIAL_ACCOUNT_ID } });
+    }
+
+    for (const user of allUsers) {
+      await addOfficialAccountAsFriend(user.id, user.username, true);
+    }
+  } catch (error) {
+    console.error('Add Official Account to all users error:', error);
+  }
+}
+
+async function addOfficialAccountAsFriend(userId, username, skipMessage = false) {
+  if (!OFFICIAL_ACCOUNT_ID) return;
+
+  try {
+    if (DATABASE_URL) {
+      const existFriendship = await friendshipsDB.query(
+        'SELECT id FROM friendships WHERE user_id = $1 AND friend_id = $2',
+        [userId, OFFICIAL_ACCOUNT_ID]
+      );
+
+      if (existFriendship.rows.length === 0) {
+        await friendshipsDB.query(
+          'INSERT INTO friendships (user_id, friend_id) VALUES ($1, $2), ($3, $4)',
+          [userId, OFFICIAL_ACCOUNT_ID, OFFICIAL_ACCOUNT_ID, userId]
+        );
+
+        if (!skipMessage) {
+          await sendWelcomeMessage(userId);
+        }
+      }
+    } else {
+      const existFriendship = await promisifyDB(friendshipsDB.find).call(friendshipsDB, {
+        user_id: userId,
+        friend_id: OFFICIAL_ACCOUNT_ID
+      });
+
+      if (existFriendship.length === 0) {
+        await promisifyDB(friendshipsDB.insert).call(friendshipsDB, {
+          user_id: userId,
+          friend_id: OFFICIAL_ACCOUNT_ID
+        });
+        await promisifyDB(friendshipsDB.insert).call(friendshipsDB, {
+          user_id: OFFICIAL_ACCOUNT_ID,
+          friend_id: userId
+        });
+
+        if (!skipMessage) {
+          await sendWelcomeMessage(userId);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Add Official Account as friend error:', error);
+  }
+}
+
+async function sendWelcomeMessage(userId) {
+  if (!OFFICIAL_ACCOUNT_ID) return;
+
+  try {
+    const messageId = uuidv4();
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+    if (DATABASE_URL) {
+      await messagesDB.query(
+        'INSERT INTO messages (id, sender_id, receiver_id, content, type, time, timestamp, read) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+        [messageId, OFFICIAL_ACCOUNT_ID, userId, DEFAULT_WELCOME_MESSAGE, 'text', timeStr, now.getTime(), false]
+      );
+    } else {
+      await promisifyDB(messagesDB.insert).call(messagesDB, {
+        _id: messageId,
+        id: messageId,
+        sender_id: OFFICIAL_ACCOUNT_ID,
+        receiver_id: userId,
+        content: DEFAULT_WELCOME_MESSAGE,
+        type: 'text',
+        time: timeStr,
+        timestamp: now.getTime(),
+        read: false
+      });
+    }
+
+    io.emit('new-message', {
+      id: messageId,
+      sender_id: OFFICIAL_ACCOUNT_ID,
+      senderId: OFFICIAL_ACCOUNT_ID,
+      receiver_id: userId,
+      content: DEFAULT_WELCOME_MESSAGE,
+      type: 'text',
+      time: timeStr,
+      timestamp: now.getTime(),
+      sender_username: OFFICIAL_ACCOUNT_USERNAME
+    });
+  } catch (error) {
+    console.error('Send welcome message error:', error);
   }
 }
 
@@ -706,12 +866,6 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-      await sendWelcomeMessage(userId, username);
-    } catch (welcomeError) {
-      console.error('Send welcome message error:', welcomeError);
-    }
-
-    try {
       await addSelfAsFriend(userId);
     } catch (selfFriendError) {
       console.error('Add self as friend error:', selfFriendError);
@@ -721,6 +875,12 @@ app.post('/api/register', async (req, res) => {
       await addAIAgentAsFriend(userId, username, false);
     } catch (aiFriendError) {
       console.error('Add AI Agent as friend error:', aiFriendError);
+    }
+
+    try {
+      await addOfficialAccountAsFriend(userId, username, false);
+    } catch (officialFriendError) {
+      console.error('Add Official Account as friend error:', officialFriendError);
     }
 
     res.json({ success: true, user: { id: userId, username, avatar: null, nickname: '' } });
@@ -1403,6 +1563,121 @@ app.post('/api/admin/config/ai-key', (req, res) => {
   }
   AI_API_KEY = apiKey;
   res.json({ success: true });
+});
+
+app.put('/api/admin/official/welcome-message', async (req, res) => {
+  const adminToken = req.headers['x-admin-token'];
+  if (!adminToken) {
+    return res.status(401).json({ success: false, message: '未授权' });
+  }
+
+  const { message } = req.body;
+  if (!message || !message.trim()) {
+    return res.status(400).json({ success: false, message: '欢迎消息不能为空' });
+  }
+
+  try {
+    if (DATABASE_URL) {
+      await configDB.query(
+        'INSERT INTO config (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
+        ['welcome_message', message]
+      );
+    } else {
+      await promisifyDB(configDB.update).call(configDB, 
+        { key: 'welcome_message' }, 
+        { $set: { value: message } }
+      );
+      
+      const existing = await promisifyDB(configDB.find).call(configDB, { key: 'welcome_message' });
+      if (!existing || existing.length === 0) {
+        await promisifyDB(configDB.insert).call(configDB, {
+          key: 'welcome_message',
+          value: message
+        });
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Save welcome message error:', error);
+    res.status(500).json({ success: false, message: '保存失败' });
+  }
+});
+
+app.post('/api/admin/official/broadcast', async (req, res) => {
+  const adminToken = req.headers['x-admin-token'];
+  if (!adminToken) {
+    return res.status(401).json({ success: false, message: '未授权' });
+  }
+
+  const { message } = req.body;
+  if (!message || !message.trim()) {
+    return res.status(400).json({ success: false, message: '消息内容不能为空' });
+  }
+
+  try {
+    let allUsers;
+    if (DATABASE_URL) {
+      allUsers = await usersDB.query('SELECT id, username FROM users WHERE id != $1', [OFFICIAL_ACCOUNT_ID]);
+      allUsers = allUsers.rows;
+    } else {
+      allUsers = await promisifyDB(usersDB.find).call(usersDB, { id: { $ne: OFFICIAL_ACCOUNT_ID } });
+    }
+
+    const sendPromises = allUsers.map(user => {
+      return new Promise(async (resolve) => {
+        try {
+          const messageId = uuidv4();
+          const now = new Date();
+          const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+          if (DATABASE_URL) {
+            await messagesDB.query(
+              'INSERT INTO messages (id, sender_id, receiver_id, content, type, time, timestamp, read) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+              [messageId, OFFICIAL_ACCOUNT_ID, user.id, message, 'text', timeStr, now.getTime(), false]
+            );
+          } else {
+            await promisifyDB(messagesDB.insert).call(messagesDB, {
+              _id: messageId,
+              id: messageId,
+              sender_id: OFFICIAL_ACCOUNT_ID,
+              receiver_id: user.id,
+              content: message,
+              type: 'text',
+              time: timeStr,
+              timestamp: now.getTime(),
+              read: false
+            });
+          }
+
+          io.emit('new-message', {
+            id: messageId,
+            sender_id: OFFICIAL_ACCOUNT_ID,
+            senderId: OFFICIAL_ACCOUNT_ID,
+            receiver_id: user.id,
+            content: message,
+            type: 'text',
+            time: timeStr,
+            timestamp: now.getTime(),
+            sender_username: OFFICIAL_ACCOUNT_USERNAME
+          });
+
+          resolve(true);
+        } catch (error) {
+          console.error(`Send broadcast to ${user.id} error:`, error);
+          resolve(false);
+        }
+      });
+    });
+
+    const results = await Promise.all(sendPromises);
+    const successCount = results.filter(r => r).length;
+
+    res.json({ success: true, count: successCount });
+  } catch (error) {
+    console.error('Broadcast message error:', error);
+    res.status(500).json({ success: false, message: '发送失败' });
+  }
 });
 
 app.post('/api/admin/change-password', async (req, res) => {

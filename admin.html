@@ -150,6 +150,27 @@
                 </div>
             </section>
 
+            <section class="official-helper-section">
+                <div class="section-header">
+                    <h2>👤 Tell官方助手</h2>
+                </div>
+                
+                <div class="official-helper-content">
+                    <div class="helper-section">
+                        <h3>欢迎消息设置</h3>
+                        <textarea id="welcome-message-input" rows="4" placeholder="输入欢迎消息...">欢迎来到Tell，我是Tell官方，应用介绍及公告在发现界面，有建议和反馈可直接给我发消息，或者加入官方QQ群738894372，祝你生活愉快~</textarea>
+                        <button id="save-welcome-message-btn" class="btn btn-primary">💾 保存欢迎消息</button>
+                    </div>
+                    
+                    <div class="helper-section">
+                        <h3>群发消息</h3>
+                        <textarea id="broadcast-message-input" rows="4" placeholder="输入要发送给所有用户的消息..."></textarea>
+                        <button id="send-broadcast-btn" class="btn btn-danger">📢 发送给所有用户</button>
+                        <p class="warning-text">⚠️ 此操作将向所有用户发送消息，请谨慎操作</p>
+                    </div>
+                </div>
+            </section>
+
             <section class="logs-section">
                 <div class="section-header">
                     <h2>系统日志</h2>
@@ -169,6 +190,7 @@
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.54 202605191400: 新增Tell官方助手功能：1. 添加Tell官方账号，所有用户默认添加为好友；2. 新用户注册后自动发送欢迎消息；3. 管理员界面新增官方助手管理区域，可修改欢迎消息和群发消息给所有用户</div>
                     <div class="update-item">✨ v5.9.53 202605191300: 修复三个问题：1. 修复 Service Worker 缓存 POST 请求导致的视频通话失效问题；2. 修复聊天界面收到新消息后自动滚动到底部失效问题；3. 修复从会话界面返回消息主页后未读消息红点未清除的问题</div>
                     <div class="update-item">✨ v5.9.52 202605191200: 修复版本号显示为 unknown 的问题，在登录界面和管理员登录界面添加 DOMContentLoaded 事件监听器，确保版本号在页面加载完成后正确显示</div>
                     <div class="update-item">✨ v5.9.51 202605191100: 移除所有硬编码版本号，统一从 version.js 动态读取；改进 Service Worker 缓存清理策略，修复刷新时版本号跳跃问题；版本号显示更稳定、更一致</div>

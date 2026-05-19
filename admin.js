@@ -97,6 +97,9 @@ class AdminPanel {
         document.getElementById('toggle-group-select-btn').addEventListener('click', () => this.toggleGroupSelectMode());
         document.getElementById('select-all-users').addEventListener('change', (e) => this.selectAllUsers(e.target.checked));
         document.getElementById('select-all-groups').addEventListener('change', (e) => this.selectAllGroups(e.target.checked));
+        
+        document.getElementById('save-welcome-message-btn').addEventListener('click', () => this.saveWelcomeMessage());
+        document.getElementById('send-broadcast-btn').addEventListener('click', () => this.sendBroadcastMessage());
         document.getElementById('batch-user-delete-btn').addEventListener('click', () => this.showBatchUserDeleteConfirm());
         document.getElementById('batch-user-pwd-btn').addEventListener('click', () => this.showBatchUserPasswordModal());
         document.getElementById('batch-group-delete-btn').addEventListener('click', () => this.showBatchGroupDeleteConfirm());
@@ -668,6 +671,69 @@ class AdminPanel {
 
     closeModal() {
         document.getElementById('confirm-modal').style.display = 'none';
+    }
+
+    async saveWelcomeMessage() {
+        const welcomeMessage = document.getElementById('welcome-message-input').value.trim();
+        
+        if (!welcomeMessage) {
+            alert('欢迎消息不能为空');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.baseUrl}/api/admin/official/welcome-message`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: welcomeMessage })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('欢迎消息保存成功');
+                this.addLog(`欢迎消息已更新`, '系统');
+            } else {
+                alert(data.message || '保存失败');
+            }
+        } catch (error) {
+            console.error('Save welcome message error:', error);
+            alert('保存失败');
+        }
+    }
+
+    async sendBroadcastMessage() {
+        const message = document.getElementById('broadcast-message-input').value.trim();
+        
+        if (!message) {
+            alert('消息内容不能为空');
+            return;
+        }
+
+        if (!confirm(`确定要向所有用户发送此消息吗？\n\n${message}`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.baseUrl}/api/admin/official/broadcast`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(`消息已发送给 ${data.count} 位用户`);
+                document.getElementById('broadcast-message-input').value = '';
+                this.addLog(`向 ${data.count} 位用户发送了群发消息`, '系统');
+            } else {
+                alert(data.message || '发送失败');
+            }
+        } catch (error) {
+            console.error('Send broadcast message error:', error);
+            alert('发送失败');
+        }
     }
 }
 
