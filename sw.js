@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tell-v5.9.54';
+const CACHE_NAME = 'tell-v5.9.55';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,7 +13,7 @@ const STATIC_ASSETS = [
   '/admin.js'
 ];
 
-const API_CACHE_NAME = 'tell-api-v5.9.54';
+const API_CACHE_NAME = 'tell-api-v5.9.55';
 
 let notificationSettings = {
   floatingNotification: true,

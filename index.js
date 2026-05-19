@@ -183,7 +183,7 @@ async function saveAdminPassword(password) {
   }
 }
 
-let usersDB, friendshipsDB, messagesDB, groupsDB, groupMembersDB, groupMessagesDB;
+let usersDB, friendshipsDB, messagesDB, groupsDB, groupMembersDB, groupMessagesDB, configDB;
 
 if (DATABASE_URL) {
   const { Pool } = require('pg');
@@ -209,6 +209,7 @@ if (DATABASE_URL) {
   groupsDB = db;
   groupMembersDB = db;
   groupMessagesDB = db;
+  configDB = db;
 } else {
   const Datastore = require('@seald-io/nedb');
   usersDB = new Datastore({ filename: './data/users.db', autoload: true });
@@ -217,6 +218,7 @@ if (DATABASE_URL) {
   groupsDB = new Datastore({ filename: './data/groups.db', autoload: true });
   groupMembersDB = new Datastore({ filename: './data/group_members.db', autoload: true });
   groupMessagesDB = new Datastore({ filename: './data/group_messages.db', autoload: true });
+  configDB = new Datastore({ filename: './data/config.db', autoload: true });
 
   usersDB.ensureIndex({ fieldName: 'username', unique: true });
   friendshipsDB.ensureIndex({ fieldName: 'user_id' });
@@ -487,7 +489,7 @@ async function addOfficialAccountAsFriend(userId, username, skipMessage = false)
         );
 
         if (!skipMessage) {
-          await sendWelcomeMessage(userId);
+          await sendOfficialWelcomeMessage(userId);
         }
       }
     } else {
@@ -507,7 +509,7 @@ async function addOfficialAccountAsFriend(userId, username, skipMessage = false)
         });
 
         if (!skipMessage) {
-          await sendWelcomeMessage(userId);
+          await sendOfficialWelcomeMessage(userId);
         }
       }
     }
@@ -516,7 +518,7 @@ async function addOfficialAccountAsFriend(userId, username, skipMessage = false)
   }
 }
 
-async function sendWelcomeMessage(userId) {
+async function sendOfficialWelcomeMessage(userId) {
   if (!OFFICIAL_ACCOUNT_ID) return;
 
   try {
@@ -555,7 +557,7 @@ async function sendWelcomeMessage(userId) {
       sender_username: OFFICIAL_ACCOUNT_USERNAME
     });
   } catch (error) {
-    console.error('Send welcome message error:', error);
+    console.error('Send official welcome message error:', error);
   }
 }
 
@@ -1566,11 +1568,6 @@ app.post('/api/admin/config/ai-key', (req, res) => {
 });
 
 app.put('/api/admin/official/welcome-message', async (req, res) => {
-  const adminToken = req.headers['x-admin-token'];
-  if (!adminToken) {
-    return res.status(401).json({ success: false, message: '未授权' });
-  }
-
   const { message } = req.body;
   if (!message || !message.trim()) {
     return res.status(400).json({ success: false, message: '欢迎消息不能为空' });
@@ -1583,13 +1580,13 @@ app.put('/api/admin/official/welcome-message', async (req, res) => {
         ['welcome_message', message]
       );
     } else {
-      await promisifyDB(configDB.update).call(configDB, 
-        { key: 'welcome_message' }, 
-        { $set: { value: message } }
-      );
-      
       const existing = await promisifyDB(configDB.find).call(configDB, { key: 'welcome_message' });
-      if (!existing || existing.length === 0) {
+      if (existing && existing.length > 0) {
+        await promisifyDB(configDB.update).call(configDB, 
+          { key: 'welcome_message' }, 
+          { $set: { value: message } }
+        );
+      } else {
         await promisifyDB(configDB.insert).call(configDB, {
           key: 'welcome_message',
           value: message
@@ -1605,11 +1602,6 @@ app.put('/api/admin/official/welcome-message', async (req, res) => {
 });
 
 app.post('/api/admin/official/broadcast', async (req, res) => {
-  const adminToken = req.headers['x-admin-token'];
-  if (!adminToken) {
-    return res.status(401).json({ success: false, message: '未授权' });
-  }
-
   const { message } = req.body;
   if (!message || !message.trim()) {
     return res.status(400).json({ success: false, message: '消息内容不能为空' });

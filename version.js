@@ -1,8 +1,8 @@
 const VERSION = {
     major: 5,
     minor: 9,
-    patch: 54,
-    build: '202605191400',
+    patch: 56,
+    build: '202605191530',
     full: function() {
         return `v${this.major}.${this.minor}.${this.patch}`;
     },
