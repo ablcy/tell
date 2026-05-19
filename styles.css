@@ -36,7 +36,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 60px;
+    padding-top: 40px;
     padding-bottom: 20px;
     box-sizing: border-box;
     background: var(--bg-color);
@@ -125,7 +125,23 @@ body {
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+}
+
+form > input,
+form > button[type="submit"] {
+    margin-bottom: 15px;
+}
+
+form > button[type="submit"] {
+    margin-bottom: 5px;
+}
+
+form > .error-message {
+    margin-bottom: 5px;
+}
+
+form > .auth-link {
+    margin-top: 0;
 }
 
 form input {
