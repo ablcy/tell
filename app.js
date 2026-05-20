@@ -1534,7 +1534,6 @@ class ChatApp {
             localStorage.removeItem('currentUser');
             this.currentUser = null;
             this.showAuthScreen();
-            alert(error.message || '登录状态已失效，请重新登录');
             throw error;
         }
     }
@@ -1551,8 +1550,7 @@ class ChatApp {
                 
                 if (!result.success) {
                     this.stopPasswordVersionCheck();
-                    this.logout();
-                    alert('密码已被修改，请重新登录');
+                    this.logout(true);
                 }
             } catch (error) {
                 // 忽略网络错误
@@ -2627,7 +2625,7 @@ class ChatApp {
             const oldCount = (oldMessages[this.currentFriend.id] || []).length;
             const newCount = (this.messages[this.currentFriend.id] || []).length;
             if (newCount > oldCount) {
-                this.renderMessages();
+                this.renderMessages(true);
             }
         }
     }
@@ -2707,6 +2705,8 @@ class ChatApp {
             const container = document.getElementById('messages-container');
             container.innerHTML = '<div class="empty-chat"><p>开始聊天吧！</p></div>';
             delete this.messages[this.currentFriend.id];
+        } else if (this.currentFriend) {
+            this.markMessagesAsRead(this.currentFriend.id);
         }
         document.getElementById('chat-view').style.display = 'none';
         this.currentFriend = null;
@@ -3122,49 +3122,50 @@ class ChatApp {
         }
     }
 
-    logout() {
-        if (confirm('确定要退出登录吗？')) {
-            this.stopPolling();
-            this.stopPasswordVersionCheck();
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('cachedFriends');
-            localStorage.removeItem('cachedGroups');
-            localStorage.removeItem('burnAfterReading');
-            this.currentUser = null;
-            this.currentFriend = null;
-            this.currentGroup = null;
-            this.messages = {};
-            this.friends = [];
-            this.groups = [];
-            this.groupMessages = {};
-            
-            // 清空所有界面元素，防止隐私泄露
-            const chatList = document.getElementById('chat-list');
-            if (chatList) {
-                chatList.innerHTML = '';
-            }
-            const messagesContainer = document.getElementById('messages-container');
-            if (messagesContainer) {
-                messagesContainer.innerHTML = '';
-            }
-            const groupMessagesContainer = document.getElementById('group-messages-container');
-            if (groupMessagesContainer) {
-                groupMessagesContainer.innerHTML = '';
-            }
-            const contactsGroupList = document.getElementById('contacts-group-list');
-            if (contactsGroupList) {
-                contactsGroupList.innerHTML = '';
-            }
-            const contactsFriendList = document.getElementById('contacts-friend-list');
-            if (contactsFriendList) {
-                contactsFriendList.innerHTML = '';
-            }
-            
-            document.getElementById('main-screen').style.display = 'none';
-            document.getElementById('auth-screen').classList.add('screen');
-            document.getElementById('auth-screen').style.display = 'flex';
-            this.showLogin();
+    logout(force = false) {
+        if (!force && !confirm('确定要退出登录吗？')) {
+            return;
         }
+        this.stopPolling();
+        this.stopPasswordVersionCheck();
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('cachedFriends');
+        localStorage.removeItem('cachedGroups');
+        localStorage.removeItem('burnAfterReading');
+        this.currentUser = null;
+        this.currentFriend = null;
+        this.currentGroup = null;
+        this.messages = {};
+        this.friends = [];
+        this.groups = [];
+        this.groupMessages = {};
+        
+        // 清空所有界面元素，防止隐私泄露
+        const chatList = document.getElementById('chat-list');
+        if (chatList) {
+            chatList.innerHTML = '';
+        }
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '';
+        }
+        const groupMessagesContainer = document.getElementById('group-messages-container');
+        if (groupMessagesContainer) {
+            groupMessagesContainer.innerHTML = '';
+        }
+        const contactsGroupList = document.getElementById('contacts-group-list');
+        if (contactsGroupList) {
+            contactsGroupList.innerHTML = '';
+        }
+        const contactsFriendList = document.getElementById('contacts-friend-list');
+        if (contactsFriendList) {
+            contactsFriendList.innerHTML = '';
+        }
+        
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('auth-screen').classList.add('screen');
+        document.getElementById('auth-screen').style.display = 'flex';
+        this.showLogin();
     }
 
     shareApp() {
