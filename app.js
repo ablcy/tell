@@ -63,6 +63,8 @@ class ChatApp {
         this.remoteStream = null;
         this.isInCall = false;
         this.currentCallTarget = null;
+        this.callRingInterval = null;
+        this.callRingAudioContext = null;
         
         this.loadBurnAfterReadingSetting();
         this.loadNotificationSettings();
@@ -134,6 +136,52 @@ class ChatApp {
             }
         } catch (e) {
             console.log('[App] Cannot play notification sound:', e);
+        }
+    }
+
+    startCallRing() {
+        if (this.callRingInterval) {
+            clearInterval(this.callRingInterval);
+        }
+        if (this.callRingAudioContext) {
+            this.callRingAudioContext.close();
+        }
+        this.callRingAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.playCallRingTone();
+        this.callRingInterval = setInterval(() => {
+            this.playCallRingTone();
+        }, 1500);
+    }
+
+    playCallRingTone() {
+        try {
+            const audioContext = this.callRingAudioContext;
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        } catch (e) {
+            console.log('[App] Cannot play call ring tone:', e);
+        }
+    }
+
+    stopCallRing() {
+        if (this.callRingInterval) {
+            clearInterval(this.callRingInterval);
+            this.callRingInterval = null;
+        }
+        if (this.callRingAudioContext) {
+            this.callRingAudioContext.close();
+            this.callRingAudioContext = null;
         }
     }
 
@@ -575,7 +623,7 @@ class ChatApp {
 
         // 检查全局视频通话通知开关
         if (this.notificationSettings.globalCall !== false && this.isNotificationEnabled(data.from, false)) {
-            this.playNotificationSound('call');
+            this.startCallRing();
         }
 
         // 显示来电界面
@@ -599,6 +647,7 @@ class ChatApp {
     }
     
     async acceptCall() {
+        this.stopCallRing();
         try {
             // 检查浏览器是否支持 mediaDevices
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -687,6 +736,7 @@ class ChatApp {
     }
     
     endCall() {
+        this.stopCallRing();
         this.isInCall = false;
         this.remoteStreamPlaying = false;
         this.isVideoPlaying = false;
