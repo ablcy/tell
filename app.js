@@ -254,6 +254,16 @@ class ChatApp {
         this.socket.on('call-reject', (data) => {
             this.handleCallReject(data);
         });
+
+        // 监听新消息（实时）
+        this.socket.on('new-message', (data) => {
+            this.handleNewMessage(data);
+        });
+
+        // 监听好友添加（实时）
+        this.socket.on('friend-added', (data) => {
+            this.handleFriendAdded(data);
+        });
     }
     
     loginSocket() {
@@ -733,6 +743,56 @@ class ChatApp {
     handleCallReject(data) {
         alert('对方拒绝了通话');
         this.endCall();
+    }
+
+    handleNewMessage(data) {
+        const { id, sender_id, sender_username, receiver_id, content, type, time, timestamp } = data;
+        const friendId = sender_id;
+
+        if (!this.messages[friendId]) {
+            this.messages[friendId] = [];
+        }
+
+        const messageExists = this.messages[friendId].some(m => m.id === id);
+        if (!messageExists) {
+            this.messages[friendId].push({
+                id,
+                senderId: sender_id,
+                senderUsername: sender_username,
+                receiverId: receiver_id,
+                content,
+                type: type || 'text',
+                time,
+                timestamp,
+                read: false
+            });
+        }
+
+        if (this.currentFriend && this.currentFriend.id === friendId) {
+            this.renderMessages(true);
+            this.markMessagesAsRead(friendId);
+        } else {
+            this.renderChatList();
+            if (this.messagesLoaded) {
+                this.playNotificationSound('message');
+            }
+        }
+    }
+
+    handleFriendAdded(data) {
+        const { friendId, friendUsername, friendAvatar, friendNickname } = data;
+
+        const exists = this.friends.some(f => f.id === friendId);
+        if (!exists) {
+            this.friends.push({
+                id: friendId,
+                username: friendUsername,
+                avatar: friendAvatar,
+                nickname: friendNickname
+            });
+            this.renderChatList();
+            this.renderContactsList();
+        }
     }
     
     endCall() {
