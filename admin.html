@@ -190,6 +190,7 @@
                     <button id="toggle-changelog-btn" class="btn btn-secondary">▼ 展开</button>
                 </div>
                 <div class="changelog-content" id="changelog-content" style="display: none;">
+                    <div class="update-item">✨ v5.9.68 202605231301: 隐藏Tell官方公告：从发现界面移除"Tell官方公告"入口；更新链接：Tell官方介绍→https://tell.super.site/、联系开发者→https://ilcy.super.site/、其他项目→https://ablcy.github.io/；改进Service Worker缓存清理策略：动态从version.js读取版本号；统一版本号管理：前端和后端所有版本号保持一致</div>
                     <div class="update-item">✨ v5.9.65 202605201406: 修复个人界面通知设置打不开和消息声音提醒问题：1. 添加通知设置按钮点击事件绑定；2. 完善全局消息通知和视频通话通知的控制逻辑；3. 添加相关函数</div>
                     <div class="update-item">✨ v5.9.67 202605201430: 彻底修复实时消息接收问题：1. 添加WebSocket实时事件监听；2. 添加socket.on('new-message')监听实时接收消息；3. 添加socket.on('friend-added')监听实时接收好友添加；4. 添加handleNewMessage()和handleFriendAdded()函数处理实时事件</div>
                     <div class="update-item">✨ v5.9.66 202605201420: 彻底修复视频通话提醒只响一次的问题：1. 添加循环播放机制，来电时铃声持续响直到接听或挂断；2. 添加startCallRing()函数循环播放铃声；3. 添加stopCallRing()函数停止铃声；4. 在acceptCall()和endCall()中调用停止铃声</div>

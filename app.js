@@ -3429,7 +3429,6 @@ class ChatApp {
             myGroups: '我的群聊',
             friendsList: '好友列表',
             tellIntro: 'Tell官方介绍',
-            tellAnnouncement: 'Tell官方公告',
             contactDeveloper: '联系开发者',
             otherProjects: '其他项目'
         },
@@ -3474,7 +3473,6 @@ class ChatApp {
             myGroups: 'My Groups',
             friendsList: 'Friends List',
             tellIntro: 'Tell Official Intro',
-            tellAnnouncement: 'Tell Announcement',
             contactDeveloper: 'Contact Developer',
             otherProjects: 'Other Projects'
         }
@@ -3552,7 +3550,6 @@ class ChatApp {
         document.querySelector('#share-app-btn span:nth-child(2)').textContent = t.shareApp;
         document.querySelector('#admin-panel-btn span:nth-child(2)').textContent = t.adminPanel;
         document.querySelector('#tell-intro-btn span:nth-child(2)').textContent = t.tellIntro;
-        document.querySelector('#tell-announcement-btn span:nth-child(2)').textContent = t.tellAnnouncement;
         document.querySelector('#contact-developer-btn span:nth-child(2)').textContent = t.contactDeveloper;
         document.querySelector('#other-projects-btn span:nth-child(2)').textContent = t.otherProjects;
 

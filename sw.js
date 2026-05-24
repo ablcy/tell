@@ -1,4 +1,6 @@
-const CACHE_NAME = 'tell-v5.9.67';
+let CACHE_NAME = 'tell-v5.9.67';
+let API_CACHE_NAME = 'tell-api-v5.9.67';
+
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,12 +15,6 @@ const STATIC_ASSETS = [
   '/admin.js'
 ];
 
-const API_CACHE_NAME = 'tell-api-v5.9.67';
-
-let notificationSettings = {
-  floatingNotification: true,
-  lockscreenNotification: true
-};
 const API_ROUTES = [
   '/api/user',
   '/api/friends',
@@ -26,34 +22,67 @@ const API_ROUTES = [
   '/api/messages'
 ];
 
+async function getVersion() {
+  try {
+    const response = await fetch('/version.js');
+    const text = await response.text();
+    const versionMatch = text.match(/major:\s*(\d+),\s*minor:\s*(\d+),\s*patch:\s*(\d+)/);
+    if (versionMatch) {
+      const [, major, minor, patch] = versionMatch;
+      return {
+        version: `v${major}.${minor}.${patch}`,
+        cacheName: `tell-v${major}.${minor}.${patch}`,
+        apiCacheName: `tell-api-v${major}.${minor}.${patch}`
+      };
+    }
+  } catch (error) {
+    console.log('[SW] Failed to fetch version.js:', error);
+  }
+  return null;
+}
+
+let notificationSettings = {
+  floatingNotification: true,
+  lockscreenNotification: true
+};
+
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing Service Worker...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => self.skipWaiting())
-      .catch((err) => console.log('[SW] Cache failed:', err))
+    getVersion().then(info => {
+      if (info) {
+        CACHE_NAME = info.cacheName;
+        API_CACHE_NAME = info.apiCacheName;
+      }
+    }).then(() => {
+      return caches.open(CACHE_NAME);
+    }).then((cache) => {
+      console.log('[SW] Caching static assets');
+      return cache.addAll(STATIC_ASSETS);
+    }).then(() => self.skipWaiting())
+    .catch((err) => console.log('[SW] Cache failed:', err))
   );
 });
 
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating Service Worker...');
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME && name !== API_CACHE_NAME)
-            .map((name) => {
-              console.log('[SW] Deleting old cache:', name);
-              return caches.delete(name);
-            })
-        );
-      })
-      .then(() => self.clients.claim())
+    getVersion().then(info => {
+      if (info) {
+        CACHE_NAME = info.cacheName;
+        API_CACHE_NAME = info.apiCacheName;
+      }
+      return caches.keys();
+    }).then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME && name !== API_CACHE_NAME)
+          .map((name) => {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
